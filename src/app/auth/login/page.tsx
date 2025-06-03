@@ -15,11 +15,12 @@ import {
 } from "@/components/ui/card";
 import { Eye, EyeOff, Heart, Shield, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useApi";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login, loading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -27,17 +28,14 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    // Handle login logic here
-    console.log("Login data:", formData);
-    setIsLoading(false);
-
-    // Redirect to dashboard or home page
-    router.push("/");
+    
+    try {
+      await login(formData);
+      router.push("/dashboard"); // Redirect to dashboard after successful login
+    } catch (error) {
+      // Error is handled by the useAuth hook
+      console.error("Login failed:", error);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -195,11 +193,11 @@ export default function LoginPage() {
                   type="submit"
                   className={cn(
                     "w-full h-12 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02]",
-                    isLoading && "opacity-70"
+                    loading && "opacity-70"
                   )}
-                  disabled={isLoading}
+                  disabled={loading}
                 >
-                  {isLoading ? (
+                  {loading ? (
                     <div className="flex items-center space-x-2">
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                       <span>Đang đăng nhập...</span>
