@@ -301,7 +301,7 @@ export function useWorkouts() {
       setError(null);
 
       try {
-        const response = await workoutService.updateWorkout(id, data);
+        const response = await workoutService.updateWorkout(parseInt(id), data);
         apiToasts.updateSuccess();
         return response;
       } catch (err: unknown) {
@@ -320,7 +320,7 @@ export function useWorkouts() {
     setError(null);
 
     try {
-      const response = await workoutService.deleteWorkout(id);
+      const response = await workoutService.deleteWorkout(parseInt(id));
       apiToasts.deleteSuccess();
       return response;
     } catch (err: unknown) {

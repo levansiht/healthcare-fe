@@ -1,48 +1,47 @@
 import { apiClient } from "@/lib/axios";
 import { API_ENDPOINTS } from "@/lib/constants";
-import { User, UserProfile, ProgressStats } from "@/types/api";
+import { User, CreateUserRequest, UpdateUserRequest } from "@/types/api";
 
 export const userService = {
-  // Get user profile
-  async getProfile(): Promise<User> {
-    return apiClient.get(API_ENDPOINTS.users.profile);
+  async getAllUsers(): Promise<User[]> {
+    return apiClient.get(API_ENDPOINTS.users.list);
   },
 
-  // Update user profile
+  async createUser(data: CreateUserRequest): Promise<User> {
+    return apiClient.post(API_ENDPOINTS.users.create, data);
+  },
+
+  async updateUser(data: UpdateUserRequest): Promise<User> {
+    return apiClient.put(API_ENDPOINTS.users.update, data);
+  },
+
+  async deleteUser(id: number): Promise<void> {
+    return apiClient.delete(API_ENDPOINTS.users.delete(id));
+  },
+
   async updateProfile(data: Partial<User>): Promise<User> {
-    return apiClient.put(API_ENDPOINTS.users.updateProfile, data);
+    if (!data.id) {
+      throw new Error("User ID is required for profile update");
+    }
+    return this.updateUser(data as UpdateUserRequest);
   },
 
-  // Update user fitness profile
-  async updateFitnessProfile(data: Partial<UserProfile>): Promise<UserProfile> {
-    return apiClient.put("/users/fitness-profile", data);
-  },
-
-  // Upload avatar
   async uploadAvatar(file: File): Promise<{ avatarUrl: string }> {
-    return apiClient.upload("/users/avatar", file);
+    // This would need to be implemented based on your backend
+    // For now, throwing an error as the healthcare API doesn't have this endpoint
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _ = file;
+    throw new Error("Avatar upload not implemented in healthcare API");
   },
 
-  // Change password
   async changePassword(
     currentPassword: string,
     newPassword: string
   ): Promise<{ message: string }> {
-    return apiClient.post("/users/change-password", {
-      currentPassword,
-      newPassword,
-    });
-  },
-
-  // Delete account
-  async deleteAccount(password: string): Promise<{ message: string }> {
-    return apiClient.delete("/users/account", {
-      data: { password },
-    });
-  },
-
-  // Get user statistics
-  async getStats(): Promise<ProgressStats> {
-    return apiClient.get("/users/stats");
+    // This would need to be implemented based on your backend
+    // For now, throwing an error as the healthcare API doesn't have this endpoint
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _ = { currentPassword, newPassword };
+    throw new Error("Change password not implemented in healthcare API");
   },
 };
