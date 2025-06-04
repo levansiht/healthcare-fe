@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -23,34 +24,38 @@ export default function Home() {
       {/* Navigation */}
       <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center space-x-2">
             <Dumbbell className="h-6 w-6 text-blue-600" />
             <span className="font-bold text-xl">FitTracker</span>
-          </div>
+          </Link>
 
           <div className="hidden md:flex items-center space-x-6">
-            <a
-              href="#features"
+            <Link
+              href="/features"
               className="text-sm font-medium hover:text-blue-600 transition-colors"
             >
               Tính năng
-            </a>
-            <a
-              href="#pricing"
+            </Link>
+            <Link
+              href="/pricing"
               className="text-sm font-medium hover:text-blue-600 transition-colors"
             >
               Bảng giá
-            </a>
-            <a
-              href="#about"
+            </Link>
+            <Link
+              href="/about"
               className="text-sm font-medium hover:text-blue-600 transition-colors"
             >
               Giới thiệu
-            </a>
-            <Button variant="outline" size="sm">
-              Đăng nhập
-            </Button>
-            <Button size="sm">Bắt đầu ngay</Button>
+            </Link>
+            <Link href="/auth/login">
+              <Button variant="outline" size="sm">
+                Đăng nhập
+              </Button>
+            </Link>
+            <Link href="/auth/login">
+              <Button size="sm">Bắt đầu ngay</Button>
+            </Link>
           </div>
 
           <Button variant="ghost" size="sm" className="md:hidden">
@@ -82,17 +87,21 @@ export default function Home() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              >
-                <Play className="mr-2 h-4 w-4" />
-                Bắt đầu miễn phí
-              </Button>
-              <Button variant="outline" size="lg">
-                Xem demo
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <Link href="/auth/login">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                >
+                  <Play className="mr-2 h-4 w-4" />
+                  Bắt đầu miễn phí
+                </Button>
+              </Link>
+              <Link href="/features">
+                <Button variant="outline" size="lg">
+                  Xem demo
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
             </div>
 
             <div className="flex items-center gap-8 pt-8">
@@ -228,13 +237,15 @@ export default function Home() {
             Tham gia cùng hàng nghìn người dùng đã thay đổi cuộc sống của họ với
             FitTracker
           </p>
-          <Button
-            size="lg"
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-          >
-            Bắt đầu miễn phí ngay hôm nay
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
+          <Link href="/auth/login">
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            >
+              Bắt đầu miễn phí ngay hôm nay
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
         </div>
       </section>
 
@@ -255,8 +266,12 @@ export default function Home() {
             <div className="space-y-4">
               <h3 className="font-semibold">Sản phẩm</h3>
               <div className="space-y-2 text-sm text-muted-foreground">
-                <div>Tính năng</div>
-                <div>Bảng giá</div>
+                <Link href="/features" className="block hover:text-blue-600">
+                  Tính năng
+                </Link>
+                <Link href="/pricing" className="block hover:text-blue-600">
+                  Bảng giá
+                </Link>
                 <div>API</div>
               </div>
             </div>
@@ -281,7 +296,7 @@ export default function Home() {
           </div>
 
           <div className="mt-12 pt-8 border-t border-border/40 text-center text-sm text-muted-foreground">
-            © 2024 FitTracker. Tất cả quyền được bảo lưu.
+            © 2025 FitTracker. Tất cả quyền được bảo lưu.
           </div>
         </div>
       </footer>
