@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import {
   Calendar,
   Dumbbell,
@@ -7,6 +10,7 @@ import {
   Shield,
   Clock,
   Target,
+  Menu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,20 +20,66 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Link from "next/link";
 
 export default function Features() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const MobileMenuContent = () => (
+    <div className="flex flex-col h-full">
+      <div className="flex items-center gap-2 px-4 py-6 border-b">
+        <Dumbbell className="h-6 w-6 text-blue-600" />
+        <span className="font-bold text-xl">FitTracker</span>
+      </div>
+
+      <div className="flex-1 overflow-auto py-4">
+        <nav className="grid gap-1 px-4">
+          <Link
+            href="/features"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent bg-accent text-accent-foreground font-medium"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Tính năng
+          </Link>
+          <Link
+            href="/pricing"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent text-muted-foreground"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Bảng giá
+          </Link>
+          <Link
+            href="/about"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent text-muted-foreground"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Giới thiệu
+          </Link>
+        </nav>
+      </div>
+
+      <div className="border-t p-4 space-y-2">
+        <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>
+          <Button variant="outline" className="w-full">
+            Đăng nhập
+          </Button>
+        </Link>
+        <Link href="/auth/login" onClick={() => setMobileMenuOpen(false)}>
+          <Button className="w-full">Bắt đầu ngay</Button>
+        </Link>
+      </div>
+    </div>
+  );
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Link href="/" className="flex items-center space-x-2">
-              <Dumbbell className="h-6 w-6 text-blue-600" />
-              <span className="font-bold text-xl">FitTracker</span>
-            </Link>
-          </div>
+          <Link href="/" className="flex items-center space-x-2">
+            <Dumbbell className="h-6 w-6 text-blue-600" />
+            <span className="font-bold text-xl">FitTracker</span>
+          </Link>
 
           <div className="hidden md:flex items-center space-x-6">
             <Link
@@ -59,6 +109,19 @@ export default function Features() {
               <Button size="sm">Bắt đầu ngay</Button>
             </Link>
           </div>
+
+          {/* Mobile Menu */}
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="sm" className="md:hidden">
+                <Menu className="h-4 w-4" />
+                <span className="sr-only">Toggle navigation menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="p-0 w-64">
+              <MobileMenuContent />
+            </SheetContent>
+          </Sheet>
         </div>
       </nav>
 
