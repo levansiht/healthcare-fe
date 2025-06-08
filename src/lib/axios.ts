@@ -172,14 +172,29 @@ async function refreshAuthToken(refreshToken: string) {
 
 export const apiClient = {
   async request<T = unknown>(config: AxiosRequestConfig): Promise<T> {
-    const response = await api.request<ApiResponse<T>>(config);
-    return response.data.data;
+    const response = await api.request(config);
+    // Handle both direct data and wrapped data responses
+    return response.data?.data !== undefined
+      ? response.data.data
+      : response.data;
   },
 
   // GET request
   async get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await api.get<ApiResponse<T>>(url, config);
-    return response.data.data;
+    const response = await api.get(url, config);
+
+    if (process.env.NODE_ENV === "development") {
+      console.log(`🔍 [API GET] ${url}:`, {
+        status: response.status,
+        data: response.data,
+        hasDataProperty: response.data?.data !== undefined,
+      });
+    }
+
+    // Handle both direct data and wrapped data responses
+    return response.data?.data !== undefined
+      ? response.data.data
+      : response.data;
   },
 
   // POST request
@@ -188,8 +203,11 @@ export const apiClient = {
     data?: unknown,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    const response = await api.post<ApiResponse<T>>(url, data, config);
-    return response.data.data;
+    const response = await api.post(url, data, config);
+    // Handle both direct data and wrapped data responses
+    return response.data?.data !== undefined
+      ? response.data.data
+      : response.data;
   },
 
   // PUT request
@@ -198,8 +216,11 @@ export const apiClient = {
     data?: unknown,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    const response = await api.put<ApiResponse<T>>(url, data, config);
-    return response.data.data;
+    const response = await api.put(url, data, config);
+    // Handle both direct data and wrapped data responses
+    return response.data?.data !== undefined
+      ? response.data.data
+      : response.data;
   },
 
   // PATCH request
@@ -208,8 +229,11 @@ export const apiClient = {
     data?: unknown,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    const response = await api.patch<ApiResponse<T>>(url, data, config);
-    return response.data.data;
+    const response = await api.patch(url, data, config);
+    // Handle both direct data and wrapped data responses
+    return response.data?.data !== undefined
+      ? response.data.data
+      : response.data;
   },
 
   // DELETE request
@@ -217,8 +241,11 @@ export const apiClient = {
     url: string,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    const response = await api.delete<ApiResponse<T>>(url, config);
-    return response.data.data;
+    const response = await api.delete(url, config);
+    // Handle both direct data and wrapped data responses
+    return response.data?.data !== undefined
+      ? response.data.data
+      : response.data;
   },
 
   async upload<T = unknown>(

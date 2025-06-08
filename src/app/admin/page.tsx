@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Users,
@@ -10,23 +10,19 @@ import {
   BarChart3,
   Activity,
   Plus,
-  Search,
-  Filter,
-  Download,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Eye,
-  Heart,
-  Star,
   Bell,
-  LogOut,
-  Home,
+  Heart,
   Menu,
+  Target,
+  Zap,
+  TrendingUp,
+  TrendingDown,
+  Eye,
+  MoreHorizontal,
+  LogOut,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -36,180 +32,200 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-// Mock data
-const stats = [
-  {
-    title: "Tổng người dùng",
-    value: "2,847",
-    change: "+12.5%",
-    trend: "up",
-    icon: Users,
-    color: "blue",
-  },
-  {
-    title: "Bài tập đã tạo",
-    value: "1,243",
-    change: "+8.2%",
-    trend: "up",
-    icon: Dumbbell,
-    color: "green",
-  },
-  {
-    title: "Lịch tập hôm nay",
-    value: "534",
-    change: "+23.1%",
-    trend: "up",
-    icon: Calendar,
-    color: "purple",
-  },
-  {
-    title: "Hoạt động",
-    value: "98.2%",
-    change: "+2.4%",
-    trend: "up",
-    icon: Activity,
-    color: "orange",
-  },
-];
-
-const recentUsers = [
-  {
-    id: 1,
-    name: "Nguyễn Văn An",
-    email: "an.nguyen@email.com",
-    avatar: "/avatars/01.png",
-    status: "active",
-    joinDate: "2024-01-15",
-    plan: "Premium",
-  },
-  {
-    id: 2,
-    name: "Trần Thị Bình",
-    email: "binh.tran@email.com",
-    avatar: "/avatars/02.png",
-    status: "active",
-    joinDate: "2024-01-14",
-    plan: "Basic",
-  },
-  {
-    id: 3,
-    name: "Lê Văn Cường",
-    email: "cuong.le@email.com",
-    avatar: "/avatars/03.png",
-    status: "inactive",
-    joinDate: "2024-01-13",
-    plan: "Premium",
-  },
-  {
-    id: 4,
-    name: "Phạm Thị Dung",
-    email: "dung.pham@email.com",
-    avatar: "/avatars/04.png",
-    status: "active",
-    joinDate: "2024-01-12",
-    plan: "Basic",
-  },
-  {
-    id: 5,
-    name: "Hoàng Văn Em",
-    email: "em.hoang@email.com",
-    avatar: "/avatars/05.png",
-    status: "active",
-    joinDate: "2024-01-11",
-    plan: "Premium",
-  },
-];
-
-const exercises = [
-  {
-    id: 1,
-    name: "Push-ups",
-    category: "Ngực",
-    difficulty: "Trung bình",
-    duration: "10 phút",
-    popularity: 95,
-  },
-  {
-    id: 2,
-    name: "Squats",
-    category: "Chân",
-    difficulty: "Dễ",
-    duration: "15 phút",
-    popularity: 89,
-  },
-  {
-    id: 3,
-    name: "Plank",
-    category: "Core",
-    difficulty: "Khó",
-    duration: "5 phút",
-    popularity: 78,
-  },
-  {
-    id: 4,
-    name: "Pull-ups",
-    category: "Lưng",
-    difficulty: "Khó",
-    duration: "12 phút",
-    popularity: 67,
-  },
-];
-
-const sidebarItems = [
-  {
-    title: "Tổng quan",
-    icon: Home,
-    href: "/admin",
-    isActive: true,
-  },
-  {
-    title: "Người dùng",
-    icon: Users,
-    href: "/admin/users",
-  },
-  {
-    title: "Bài tập",
-    icon: Dumbbell,
-    href: "/admin/exercises",
-  },
-  {
-    title: "Lịch tập",
-    icon: Calendar,
-    href: "/admin/schedules",
-  },
-  {
-    title: "Thống kê",
-    icon: BarChart3,
-    href: "/admin/analytics",
-  },
-  {
-    title: "Cài đặt",
-    icon: Settings,
-    href: "/admin/settings",
-  },
-];
+import { userService } from "@/services/userService";
+import { exerciseService } from "@/services/exerciseService";
+import { planService } from "@/services/planService";
+import { sessionService } from "@/services/sessionService";
+import { setService } from "@/services/setService";
+import { bodyTrackService } from "@/services/bodyTrackService";
+import { User, Exercise, Plan, Session, Set, BodyTrack } from "@/types/api";
 
 export default function AdminDashboard() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [sets, setSets] = useState<Set[]>([]);
+  const [bodyTracks, setBodyTracks] = useState<BodyTrack[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    console.log("🔄 Users state updated:", users.length, users);
+  }, [users]);
+
+  useEffect(() => {
+    console.log("🔄 Exercises state updated:", exercises.length, exercises);
+  }, [exercises]);
+
+  useEffect(() => {
+    console.log("🚀 Starting dashboard data load...");
+    const loadDashboardData = async () => {
+      try {
+        setLoading(true);
+
+        console.log("📡 Calling APIs...");
+        const [
+          usersData,
+          exercisesData,
+          plansData,
+          sessionsData,
+          setsData,
+          bodyTracksData,
+        ] = await Promise.all([
+          userService.getAllUsers().catch((err) => {
+            console.error("❌ Users API error:", err);
+            return [];
+          }),
+          exerciseService.getAllExercises().catch((err) => {
+            console.error("❌ Exercises API error:", err);
+            return [];
+          }),
+          planService.getAllPlans().catch((err) => {
+            console.error("❌ Plans API error:", err);
+            return [];
+          }),
+          sessionService.getAllSessions().catch((err) => {
+            console.error("❌ Sessions API error:", err);
+            return [];
+          }),
+          setService.getAllSets().catch((err) => {
+            console.error("❌ Sets API error:", err);
+            return [];
+          }),
+          bodyTrackService.getAllBodyTracks().catch((err) => {
+            console.error("❌ BodyTracks API error:", err);
+            return [];
+          }),
+        ]);
+
+        console.log("📊 API Results:", {
+          users: usersData,
+          exercises: exercisesData,
+          plans: plansData,
+          sessions: sessionsData,
+          sets: setsData,
+          bodyTracks: bodyTracksData,
+        });
+
+        setUsers(usersData || []);
+        setExercises(exercisesData || []);
+        setPlans(plansData || []);
+        setSessions(sessionsData || []);
+        setSets(setsData || []);
+        setBodyTracks(bodyTracksData || []);
+
+        console.log("✅ Dashboard data loaded successfully");
+      } catch (error) {
+        console.error("💥 Error loading dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboardData();
+  }, []);
+
+  const stats = [
+    {
+      title: "Tổng người dùng",
+      value: (users?.length || 0).toString(),
+      change: "+12.5%",
+      trend: "up" as const,
+      icon: Users,
+      color: "blue",
+      href: "/admin/users",
+    },
+    {
+      title: "Bài tập đã tạo",
+      value: (exercises?.length || 0).toString(),
+      change: "+8.2%",
+      trend: "up" as const,
+      icon: Dumbbell,
+      color: "green",
+      href: "/admin/exercises",
+    },
+    {
+      title: "Kế hoạch tập",
+      value: (plans?.length || 0).toString(),
+      change: "+23.1%",
+      trend: "up" as const,
+      icon: Target,
+      color: "purple",
+      href: "/admin/plans",
+    },
+    {
+      title: "Phiên tập",
+      value: (sessions?.length || 0).toString(),
+      change: "+15.3%",
+      trend: "up" as const,
+      icon: Calendar,
+      color: "orange",
+      href: "/admin/sessions",
+    },
+  ];
+
+  const recentUsers = (users || []).slice(-5).reverse();
+  const recentExercises = (exercises || []).slice(-5).reverse();
+
+  const sidebarItems = [
+    {
+      title: "Dashboard",
+      icon: BarChart3,
+      href: "/admin",
+      active: true,
+    },
+    {
+      title: "Người dùng",
+      icon: Users,
+      href: "/admin/users",
+      count: users?.length || 0,
+    },
+    {
+      title: "Bài tập",
+      icon: Dumbbell,
+      href: "/admin/exercises",
+      count: exercises?.length || 0,
+    },
+    {
+      title: "Kế hoạch",
+      icon: Target,
+      href: "/admin/plans",
+      count: plans?.length || 0,
+    },
+    {
+      title: "Phiên tập",
+      icon: Calendar,
+      href: "/admin/sessions",
+      count: sessions?.length || 0,
+    },
+    {
+      title: "Set tập luyện",
+      icon: Zap,
+      href: "/admin/sets",
+      count: sets?.length || 0,
+    },
+    {
+      title: "Thể trạng",
+      icon: Activity,
+      href: "/admin/bodytracks",
+      count: bodyTracks?.length || 0,
+    },
+    {
+      title: "Cài đặt",
+      icon: Settings,
+      href: "/admin/settings",
+    },
+  ];
 
   const SidebarContent = () => (
     <>
@@ -232,342 +248,296 @@ export default function AdminDashboard() {
               key={item.title}
               href={item.href}
               className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent ${
-                item.isActive
+                item.active
                   ? "bg-accent text-accent-foreground font-medium"
                   : "text-muted-foreground"
               }`}
-              onClick={() => setSidebarOpen(false)}
+              onClick={() => setIsSidebarOpen(false)}
             >
               <item.icon className="h-4 w-4" />
               {item.title}
+              {item.count !== undefined && (
+                <Badge variant="secondary" className="ml-auto">
+                  {item.count}
+                </Badge>
+              )}
             </Link>
           ))}
         </nav>
       </div>
 
       <div className="border-t p-4">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="w-full justify-start gap-2 p-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src="/avatars/admin.png" alt="Admin" />
-                <AvatarFallback>AD</AvatarFallback>
-              </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">Admin User</span>
-                <span className="truncate text-xs text-muted-foreground">
-                  admin@fittracker.com
-                </span>
-              </div>
-              <MoreHorizontal className="ml-auto size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="/avatars/admin.png" alt="Admin" />
-                  <AvatarFallback>AD</AvatarFallback>
-                </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Admin User</span>
-                  <span className="truncate text-xs text-muted-foreground">
-                    admin@fittracker.com
-                  </span>
-                </div>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              Cài đặt tài khoản
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Bell className="mr-2 h-4 w-4" />
-              Thông báo
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut className="mr-2 h-4 w-4" />
-              Đăng xuất
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-2">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src="/avatars/admin.png" alt="Admin" />
+            <AvatarFallback>AD</AvatarFallback>
+          </Avatar>
+          <div className="grid flex-1 text-left text-sm leading-tight">
+            <span className="truncate font-semibold">Admin User</span>
+            <span className="truncate text-xs text-muted-foreground">
+              admin@fittracker.com
+            </span>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>
+                <Settings className="mr-2 h-4 w-4" />
+                Cài đặt
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <LogOut className="mr-2 h-4 w-4" />
+                Đăng xuất
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </>
   );
 
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen w-full bg-background">
-      {/* Desktop Sidebar - Hidden on mobile */}
-      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 lg:z-50 lg:bg-card lg:border-r">
-        <SidebarContent />
-      </aside>
+    <div className="flex h-screen bg-background">
+      {/* Desktop Sidebar */}
+      <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
+        <div className="flex flex-col flex-1 min-h-0 border-r bg-card">
+          <SidebarContent />
+        </div>
+      </div>
 
       {/* Mobile Sidebar */}
-      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="left" className="p-0 w-64 lg:hidden">
+      <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+        <SheetContent side="left" className="p-0 w-64">
           <SidebarContent />
         </SheetContent>
       </Sheet>
 
       {/* Main Content */}
-      <div className="flex-1 lg:pl-64">
-        <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4">
-          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="lg:hidden">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle navigation menu</span>
+      <div className="flex flex-col flex-1 md:pl-64">
+        {/* Header */}
+        <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+          <div className="flex h-16 items-center px-4 gap-4">
+            <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+            </Sheet>
+
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold">Dashboard</h1>
+              <p className="text-muted-foreground">
+                Tổng quan về hệ thống quản lý sức khỏe
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="icon">
+                <Bell className="h-5 w-5" />
               </Button>
-            </SheetTrigger>
-          </Sheet>
-          <div className="flex-1">
-            <h1 className="text-xl font-semibold">Dashboard</h1>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Thêm mới
+              </Button>
+            </div>
           </div>
         </header>
 
-        <main className="flex-1 overflow-auto p-4">
-          {/* Stats Cards - Responsive Grid */}
-          <div className="grid auto-rows-min gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-4">
+        {/* Main */}
+        <main className="flex-1 overflow-auto p-6">
+          {/* Stats Grid */}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-6">
             {stats.map((stat, index) => (
-              <Card key={index} className="border-0 shadow-sm">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    {stat.title}
-                  </CardTitle>
-                  <stat.icon className={`h-4 w-4 text-${stat.color}-600`} />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stat.value}</div>
-                  <p className="text-xs text-muted-foreground">
-                    <span className={`text-${stat.color}-600`}>
-                      {stat.change}
-                    </span>{" "}
-                    so với tháng trước
-                  </p>
-                </CardContent>
-              </Card>
+              <Link key={index} href={stat.href}>
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      {stat.title}
+                    </CardTitle>
+                    <stat.icon className={`h-4 w-4 text-${stat.color}-600`} />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stat.value}</div>
+                    <div className="flex items-center text-xs text-muted-foreground">
+                      {stat.trend === "up" ? (
+                        <TrendingUp className="mr-1 h-3 w-3 text-green-600" />
+                      ) : (
+                        <TrendingDown className="mr-1 h-3 w-3 text-red-600" />
+                      )}
+                      {stat.change} so với tháng trước
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
 
-          {/* Main Content - Mobile First Responsive */}
-          <div className="grid gap-4 lg:grid-cols-7 mb-4">
-            {/* Recent Users - Mobile Optimized */}
-            <Card className="lg:col-span-4">
-              <CardHeader>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <CardTitle>Người dùng gần đây</CardTitle>
-                    <CardDescription>
-                      Danh sách người dùng mới đăng ký
-                    </CardDescription>
-                  </div>
-                  <Button size="sm" className="gap-1 w-full sm:w-auto">
-                    <Plus className="h-4 w-4" />
-                    Thêm mới
-                  </Button>
+          {/* Content Grid */}
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Recent Users */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Người dùng mới</CardTitle>
+                  <CardDescription>
+                    {recentUsers.length} người dùng đăng ký gần đây
+                  </CardDescription>
                 </div>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/admin/users">
+                    <Eye className="mr-2 h-4 w-4" />
+                    Xem tất cả
+                  </Link>
+                </Button>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {/* Search and Filter - Mobile Stack */}
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                    <div className="relative flex-1">
-                      <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Tìm kiếm người dùng..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-8"
-                      />
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full sm:w-auto"
-                    >
-                      <Filter className="h-4 w-4" />
-                      <span className="sm:hidden ml-2">Bộ lọc</span>
-                    </Button>
-                  </div>
-
-                  {/* Table with Horizontal Scroll on Mobile */}
-                  <div className="rounded-md border overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="min-w-[200px]">
-                              Người dùng
-                            </TableHead>
-                            <TableHead className="min-w-[100px]">
-                              Trạng thái
-                            </TableHead>
-                            <TableHead className="min-w-[80px]">Gói</TableHead>
-                            <TableHead className="text-right min-w-[80px]">
-                              Hành động
-                            </TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {recentUsers.map((user) => (
-                            <TableRow key={user.id}>
-                              <TableCell className="font-medium">
-                                <div className="flex items-center gap-2">
-                                  <Avatar className="h-8 w-8 flex-shrink-0">
-                                    <AvatarImage src={user.avatar} />
-                                    <AvatarFallback>
-                                      {user.name
-                                        .split(" ")
-                                        .map((n) => n[0])
-                                        .join("")}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div className="min-w-0 flex-1">
-                                    <div className="font-medium truncate">
-                                      {user.name}
-                                    </div>
-                                    <div className="text-sm text-muted-foreground truncate">
-                                      {user.email}
-                                    </div>
-                                  </div>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <Badge
-                                  variant={
-                                    user.status === "active"
-                                      ? "default"
-                                      : "secondary"
-                                  }
-                                  className="text-xs whitespace-nowrap"
-                                >
-                                  {user.status === "active"
-                                    ? "Hoạt động"
-                                    : "Không hoạt động"}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant="outline" className="text-xs">
-                                  {user.plan}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      className="h-8 w-8 p-0"
-                                    >
-                                      <MoreHorizontal className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuItem>
-                                      <Eye className="mr-2 h-4 w-4" />
-                                      Xem chi tiết
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem>
-                                      <Edit className="mr-2 h-4 w-4" />
-                                      Chỉnh sửa
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem className="text-destructive">
-                                      <Trash2 className="mr-2 h-4 w-4" />
-                                      Xóa
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  </div>
+                  {recentUsers.length > 0 ? (
+                    recentUsers.map((user) => (
+                      <div
+                        key={user.id}
+                        className="flex items-center justify-between space-x-4"
+                      >
+                        <div className="flex items-center space-x-4">
+                          <Avatar>
+                            <AvatarImage src={`/avatars/0${user.id}.png`} />
+                            <AvatarFallback>
+                              {user.username?.[0]?.toUpperCase() || "U"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium leading-none">
+                              {user.username}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              ID: {user.id}
+                            </p>
+                          </div>
+                        </div>
+                        <Badge
+                          variant={
+                            user.membershipTier === "Premium"
+                              ? "default"
+                              : "secondary"
+                          }
+                        >
+                          {user.membershipTier}
+                        </Badge>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Chưa có người dùng nào
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Exercise Overview - Responsive */}
-            <Card className="lg:col-span-3">
-              <CardHeader>
-                <CardTitle>Bài tập phổ biến</CardTitle>
-                <CardDescription>
-                  Top bài tập được thực hiện nhiều nhất
-                </CardDescription>
+            {/* Recent Exercises */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Bài tập mới</CardTitle>
+                  <CardDescription>
+                    {recentExercises.length} bài tập được tạo gần đây
+                  </CardDescription>
+                </div>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/admin/exercises">
+                    <Eye className="mr-2 h-4 w-4" />
+                    Xem tất cả
+                  </Link>
+                </Button>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {exercises.map((exercise) => (
-                    <div key={exercise.id} className="flex items-center gap-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted flex-shrink-0">
-                        <Dumbbell className="h-5 w-5" />
-                      </div>
-                      <div className="flex-1 space-y-1 min-w-0">
-                        <p className="text-sm font-medium leading-none truncate">
-                          {exercise.name}
-                        </p>
-                        <p className="text-sm text-muted-foreground truncate">
-                          {exercise.category} • {exercise.duration}
-                        </p>
-                      </div>
-                      <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 flex-shrink-0">
-                        <Badge variant="outline" className="text-xs">
-                          {exercise.difficulty}
-                        </Badge>
-                        <div className="flex items-center gap-1">
-                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                          <span className="text-sm font-medium">
-                            {exercise.popularity}%
-                          </span>
+                  {recentExercises.length > 0 ? (
+                    recentExercises.map((exercise) => (
+                      <div
+                        key={exercise.id}
+                        className="flex items-center justify-between"
+                      >
+                        <div>
+                          <p className="text-sm font-medium">{exercise.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {exercise.muscle}
+                          </p>
                         </div>
+                        <Badge variant="outline">
+                          {exercise.description?.slice(0, 20)}...
+                        </Badge>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Chưa có bài tập nào
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Quick Actions - Mobile Optimized */}
-          <Card>
+          {/* Quick Actions */}
+          <Card className="mt-6">
             <CardHeader>
-              <CardTitle>Hành động nhanh</CardTitle>
+              <CardTitle>Thao tác nhanh</CardTitle>
               <CardDescription>
-                Các tác vụ thường dùng trong quản trị
+                Các chức năng thường dùng trong quản lý hệ thống
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-                <Button
-                  className="h-20 flex-col gap-2 text-center"
-                  variant="outline"
-                >
-                  <Users className="h-6 w-6" />
-                  <span className="text-xs sm:text-sm">Quản lý người dùng</span>
+              <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
+                <Button variant="outline" className="h-20 flex-col" asChild>
+                  <Link href="/admin/users">
+                    <Users className="h-6 w-6 mb-2" />
+                    <span className="text-xs">Quản lý người dùng</span>
+                  </Link>
                 </Button>
-                <Button
-                  className="h-20 flex-col gap-2 text-center"
-                  variant="outline"
-                >
-                  <Dumbbell className="h-6 w-6" />
-                  <span className="text-xs sm:text-sm">Thêm bài tập mới</span>
+                <Button variant="outline" className="h-20 flex-col" asChild>
+                  <Link href="/admin/exercises">
+                    <Dumbbell className="h-6 w-6 mb-2" />
+                    <span className="text-xs">Quản lý bài tập</span>
+                  </Link>
                 </Button>
-                <Button
-                  className="h-20 flex-col gap-2 text-center"
-                  variant="outline"
-                >
-                  <BarChart3 className="h-6 w-6" />
-                  <span className="text-xs sm:text-sm">Xem báo cáo</span>
+                <Button variant="outline" className="h-20 flex-col" asChild>
+                  <Link href="/admin/plans">
+                    <Target className="h-6 w-6 mb-2" />
+                    <span className="text-xs">Quản lý kế hoạch</span>
+                  </Link>
                 </Button>
-                <Button
-                  className="h-20 flex-col gap-2 text-center"
-                  variant="outline"
-                >
-                  <Download className="h-6 w-6" />
-                  <span className="text-xs sm:text-sm">Xuất dữ liệu</span>
+                <Button variant="outline" className="h-20 flex-col" asChild>
+                  <Link href="/admin/sessions">
+                    <Calendar className="h-6 w-6 mb-2" />
+                    <span className="text-xs">Quản lý phiên tập</span>
+                  </Link>
+                </Button>
+                <Button variant="outline" className="h-20 flex-col" asChild>
+                  <Link href="/admin/sets">
+                    <Zap className="h-6 w-6 mb-2" />
+                    <span className="text-xs">Quản lý set</span>
+                  </Link>
+                </Button>
+                <Button variant="outline" className="h-20 flex-col" asChild>
+                  <Link href="/admin/bodytracks">
+                    <Activity className="h-6 w-6 mb-2" />
+                    <span className="text-xs">Theo dõi thể trạng</span>
+                  </Link>
                 </Button>
               </div>
             </CardContent>

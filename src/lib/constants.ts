@@ -4,53 +4,53 @@ export const API_BASE_URL =
 export const API_ENDPOINTS = {
   // Auth endpoints (placeholder - healthcare API may not have these)
   auth: {
-    login: "/api/auth/login",
-    register: "/api/auth/register",
-    logout: "/api/auth/logout",
-    refresh: "/api/auth/refresh",
-    me: "/api/auth/me",
+    login: "/auth/login",
+    register: "/auth/register",
+    logout: "/auth/logout",
+    refresh: "/auth/refresh",
+    me: "/auth/me",
   },
   // User endpoints
   users: {
-    list: "/api/users",
-    create: "/api/users",
-    update: "/api/users",
-    delete: (id: number) => `/api/users/${id}`,
+    list: "/user",
+    create: "/user",
+    update: "/user",
+    delete: (id: number) => `/user/${id}`,
   },
   // Plan endpoints
   plans: {
-    list: "/api/plans",
-    create: "/api/plans",
-    update: "/api/plans",
-    delete: (id: number) => `/api/plans/${id}`,
+    list: "/plan",
+    create: "/plan",
+    update: "/plan",
+    delete: (id: number) => `/plan/${id}`,
   },
   // Exercise endpoints
   exercises: {
-    list: "/api/exercises",
-    create: "/api/exercises",
-    update: "/api/exercises",
-    delete: (id: number) => `/api/exercises/${id}`,
+    list: "/exercise",
+    create: "/exercise",
+    update: "/exercise",
+    delete: (id: number) => `/exercise/${id}`,
   },
   // Session endpoints
   sessions: {
-    list: "/api/sessions",
-    create: "/api/sessions",
-    update: "/api/sessions",
-    delete: (id: number) => `/api/sessions/${id}`,
+    list: "/session",
+    create: "/session",
+    update: "/session",
+    delete: (id: number) => `/session/${id}`,
   },
   // Set endpoints
   sets: {
-    list: "/api/sets",
-    create: "/api/sets",
-    update: "/api/sets",
-    delete: (id: number) => `/api/sets/${id}`,
+    list: "/set",
+    create: "/set",
+    update: "/set",
+    delete: (id: number) => `/set/${id}`,
   },
   // BodyTrack endpoints
   bodyTracks: {
-    list: "/api/bodytracks",
-    create: "/api/bodytracks",
-    update: "/api/bodytracks",
-    delete: (id: number) => `/api/bodytracks/${id}`,
+    list: "/bodytrack",
+    create: "/bodytrack",
+    update: "/bodytrack",
+    delete: (id: number) => `/bodytrack/${id}`,
   },
 } as const;
 

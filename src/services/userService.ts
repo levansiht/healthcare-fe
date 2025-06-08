@@ -7,6 +7,10 @@ export const userService = {
     return apiClient.get(API_ENDPOINTS.users.list);
   },
 
+  async getUserById(id: number): Promise<User> {
+    return apiClient.get(`${API_ENDPOINTS.users.list}/${id}`);
+  },
+
   async createUser(data: CreateUserRequest): Promise<User> {
     return apiClient.post(API_ENDPOINTS.users.create, data);
   },
