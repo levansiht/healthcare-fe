@@ -23,8 +23,6 @@ export const authService = {
         endpoint,
         credentials
       );
-      console.log("Login response:", response);
-
       return response;
     } catch (error) {
       throw new Error(`Login failed for ${loginType}: ` + (error as Error).message);
@@ -48,7 +46,7 @@ export const authService = {
 
   // Logout user
   async logout(): Promise<{ message: string }> {
-    // For now, just return success message
+
     return { message: "Logged out successfully" };
   },
 

@@ -9,6 +9,7 @@ import { authUtils } from "@/lib/axios";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useApi";
 
 const navItems = [
     { href: "/features", label: "Tính năng" },
@@ -29,25 +30,18 @@ const UserDropdownItems = [
 
 export function UserDropdown() {
     const [open, setOpen] = useState(false);
+    const {logout} = useAuth();
     const router = useRouter();
 
-    const handleLogout = () => {
-        authUtils.clearTokens();
-        router.push("/auth/login");
+    const handleLogout = async () => {
+        await logout();
         setOpen(false);
+        return router.push("/auth/login");
     };
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                {/* <Button
-                    onClick={() => {
-                        setOpen((prev) => !prev);
-                    }}
-                    className="bg-inherit px-2 text-gray-300 lg:px-4"
-                >
-                   
-                </Button> */}
                 <Image
                     src="/image-default.jpeg"
                     onClick={() => {
@@ -94,7 +88,7 @@ export function UserDropdown() {
 
 export default function HeaderComponent() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const token = authUtils.isAuthenticated();
+    const token = authUtils.isAuthenticated();    
 
     const MobileMenuContent = () => (
         <div className="flex flex-col h-full">

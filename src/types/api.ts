@@ -54,6 +54,7 @@ export interface User {
 
 export interface CreateUserRequest {
   username: string;
+  role: RoleEnum;
   password: string;
   membershipTier?: MembershipTier;
 }
@@ -61,6 +62,7 @@ export interface CreateUserRequest {
 export interface UpdateUserRequest {
   id: number;
   username?: string;
+  role: RoleEnum;
   password?: string;
   membershipTier?: MembershipTier;
 }

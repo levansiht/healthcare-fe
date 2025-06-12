@@ -3,7 +3,7 @@
 
 import { cookies } from 'next/headers';
 
-const AUTH_COOKIE_NAME = 'auth-token'; // Consistent cookie name
+const AUTH_COOKIE_NAME = 'auth-token';
 
 export async function setAuthCookieAction(token: string) {
   if (!token || typeof token !== 'string') {
@@ -15,7 +15,7 @@ export async function setAuthCookieAction(token: string) {
       secure: process.env.NODE_ENV === 'development',
       path: '/',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // Ví dụ: 7 ngày
+      maxAge: 60 * 60 * 24 * 7, 
     });
     return { success: true, message: 'Auth cookie set successfully.' };
   } catch (error) {
@@ -56,5 +56,21 @@ export async function setRoleUserCookieAction(role: string) {
   } catch (error) {
     console.error('setRoleUserCookieAction Error:', error);
     return { success: false, message: 'Failed to set role cookie.' };
+  }
+}
+
+export async function getTokenFromCookies() {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(AUTH_COOKIE_NAME)?.value || null;
+    if (!token) {
+      console.warn('No auth token found in cookies.');
+      return null;
+    }
+    return token;
+  }
+  catch (error) {
+    console.error('getTokenFromCookies Error:', error);
+    return null;
   }
 }

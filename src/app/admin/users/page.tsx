@@ -83,6 +83,7 @@ export default function UsersPage() {
   const createForm = useForm<CreateUserRequest>({
     defaultValues: {
       username: "",
+      role: "User",
       password: "",
       membershipTier: "Basic",
     },
@@ -91,6 +92,7 @@ export default function UsersPage() {
   const editForm = useForm<UpdateUserRequest>({
     defaultValues: {
       username: "",
+      role: "User",
       membershipTier: "Basic",
     },
   });
@@ -194,6 +196,30 @@ export default function UsersPage() {
                     </FormItem>
                   )}
                 />
+                 <FormField
+                  control={createForm.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phân quyền người dùng</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Chọn phân quyền" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="User">Người dùng</SelectItem>
+                            <SelectItem value="Admin">Quản trị viên</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={createForm.control}
                   name="password"
@@ -281,15 +307,16 @@ export default function UsersPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Tên người dùng</TableHead>
-                    <TableHead>Gói thành viên</TableHead>
-                    <TableHead className="text-right">Hành động</TableHead>
+                    <TableHead  className="text-center">ID</TableHead>
+                    <TableHead  className="text-center">Tên người dùng</TableHead>
+                    <TableHead  className="text-center">Gói thành viên</TableHead>
+                    <TableHead  className="text-center">Phân quyền người dùng</TableHead>
+                    <TableHead  className="text-right">Hành động</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {(filteredUsers || []).map((user) => (
-                    <TableRow key={user.id}>
+                    <TableRow key={user.id} className="text-center">
                       <TableCell className="font-medium">{user.id}</TableCell>
                       <TableCell>{user.username}</TableCell>
                       <TableCell>
@@ -298,6 +325,13 @@ export default function UsersPage() {
                         >
                           {user.membershipTier}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {user.role === "Admin" ? (
+                          <p >Quản trị viên</p>
+                        ) : (
+                          <p>Người dùng</p>
+                        )}
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>

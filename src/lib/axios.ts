@@ -173,7 +173,6 @@ async function refreshAuthToken(refreshToken: string) {
 export const apiClient = {
   async request<T = unknown>(config: AxiosRequestConfig): Promise<T> {
     const response = await api.request(config);
-    // Handle both direct data and wrapped data responses
     return response.data?.data !== undefined
       ? response.data.data
       : response.data;
@@ -292,13 +291,13 @@ export const apiClient = {
 
 export const authUtils = {
   async setTokens(accessToken: string): Promise<void> {
-     setAuthToken(accessToken);
+    setAuthToken(accessToken);
     // if (typeof window !== "undefined") {
     //   localStorage.setItem("refresh-token", refreshToken);
     // }        
      if (typeof window !== "undefined") {
       try {
-        const { setAuthCookieAction } = await import('@/app/actions/authActions'); 
+        const { setAuthCookieAction } = await import('@/actions/authActions'); 
         const result = await setAuthCookieAction(accessToken);
         if (!result.success) {
           console.error("Failed to set auth cookie via Server Action:", result.message);
@@ -311,7 +310,7 @@ export const authUtils = {
   async setRoleUser(role: string): Promise<void> {
     if (typeof window !== "undefined") {
       try {
-        const { setRoleUserCookieAction } = await import('@/app/actions/authActions'); 
+        const { setRoleUserCookieAction } = await import('@/actions/authActions'); 
         const result = await setRoleUserCookieAction(role);
         if (!result.success) {
           console.error("Failed to set role cookie via Server Action:", result.message);
@@ -322,8 +321,16 @@ export const authUtils = {
     }
   },
 
-  clearTokens(): void {
+  async clearTokens(): Promise<void> {
     clearAuthData();
+    if (typeof window !== "undefined") {
+      try {
+        const { clearAuthCookieAction } = await import('@/actions/authActions');
+        await clearAuthCookieAction();
+      } catch (e) {
+        console.error("Error invoking clearAuthData:", e);
+      }
+    }
   },
 
   getToken(): string | null {

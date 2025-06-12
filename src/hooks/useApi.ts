@@ -36,7 +36,7 @@ export function useAuth() {
             await authUtils.setTokens(response.token);
             await authUtils.setRoleUser(response.role);
             
-            setUser(response); // Assuming LoginResponse is compatible with User
+            setUser(response); 
 
             authToasts.loginSuccess();
             return response;
@@ -75,7 +75,7 @@ export function useAuth() {
         setLoading(true);
 
         try {
-            await authService.logout();
+            await authUtils.clearTokens();
             authToasts.logoutSuccess();
         } catch (err) {
             console.error("Logout error:", err);
