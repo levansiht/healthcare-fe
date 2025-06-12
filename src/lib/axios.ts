@@ -160,6 +160,7 @@ function setAuthToken(token: string): void {
 function clearAuthData(): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+  localStorage.removeItem("user");
   localStorage.removeItem("refresh-token");
   localStorage.removeItem(STORAGE_KEYS.USER_PREFERENCES);
 }

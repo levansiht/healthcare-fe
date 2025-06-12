@@ -31,6 +31,14 @@ export function useSessionQuery(id: number) {
   });
 }
 
+export function useSessionsByUserQuery(userId: number) {
+  return useQuery({
+    queryKey: sessionKeys.list({ userId }),
+    queryFn: () => sessionService.getSessionsByUser(userId),
+    enabled: !!userId,
+  });
+}
+
 export function useCreateSessionMutation() {
   const queryClient = useQueryClient();
   const { success, error: showError } = useToast();

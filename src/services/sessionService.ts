@@ -18,6 +18,12 @@ export const sessionService = {
     return apiClient.get(`${API_ENDPOINTS.sessions.list}/${id}`);
   },
 
+  // Get sessions by user ID
+  async getSessionsByUser(userId: number): Promise<Session[]> {
+    return apiClient.get(API_ENDPOINTS.sessions.list, {
+      params: { userId },
+    });
+  },
   // Create session
   async createSession(data: CreateSessionRequest): Promise<Session> {
     return apiClient.post(API_ENDPOINTS.sessions.create, data);

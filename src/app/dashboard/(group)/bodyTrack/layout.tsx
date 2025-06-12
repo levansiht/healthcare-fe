@@ -8,7 +8,7 @@ export default function DashboardBodyTrackLayout({
     const routeItems = [
         { label: "BMI", href: "/dashboard/bodyTrack/BMI" },
         { label: "Body Weight", href: "/dashboard/bodyTrack/body-weight" },
-        { label: "Training Volume", href: "/dashboard/bodyTrack/tranning-volume" },
+        { label: "Training Volume", href: "/dashboard/bodyTrack/training-volume" },
     ];
     const content = { 
         title: "Theo dõi sức khỏe",

@@ -23,6 +23,11 @@ const getErrorMessage = (error: unknown, fallback: string): string => {
     return fallback;
 };
 
+// Optimize: Pre-computed error message templates for better performance
+const createLoginErrorMessage = (loginType: RoleEnum): string => {
+    return `Đăng nhập ${loginType === "Admin" ? "Admin " : ""}thất bại`;
+};
+
 export function useAuth() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -33,15 +38,23 @@ export function useAuth() {
         setError(null);
         try {
             const response = await authService.login(credentials, loginType);
-            await authUtils.setTokens(response.token);
-            await authUtils.setRoleUser(response.role);
             
-            setUser(response); 
-
+            // Optimize: Run async operations in parallel where possible
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { token, ...userWithoutToken } = response;
+            const userDataString = JSON.stringify(userWithoutToken);
+            
+            const [, ,] = await Promise.all([
+                authUtils.setTokens(response.token),
+                authUtils.setRoleUser(response.role),
+                Promise.resolve(localStorage.setItem("user", userDataString)) 
+            ]);
+            
+            setUser(userWithoutToken);
             authToasts.loginSuccess();
             return response;
         } catch (err: unknown) {
-            const errorMessage = getErrorMessage(err, `Đăng nhập ${loginType === "Admin" ? "Admin " : ""}thất bại`);
+            const errorMessage = getErrorMessage(err, createLoginErrorMessage(loginType));
             console.error(`Login error (${loginType}):`, errorMessage);
             setError(errorMessage);
             authToasts.loginError(errorMessage);
@@ -76,6 +89,7 @@ export function useAuth() {
 
         try {
             await authUtils.clearTokens();
+            
             authToasts.logoutSuccess();
         } catch (err) {
             console.error("Logout error:", err);

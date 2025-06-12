@@ -17,7 +17,7 @@ export default function Dashboard() {
             description: "Ghi lại và theo dõi các chỉ số cơ thể của bạn như cân nặng, số đo các vòng...",
             icon: Activity,
             color: "text-teal-600",
-            features: [ // Added features list
+            features: [ 
                 "Theo dõi cân nặng, chiều cao",
                 "Ghi chú số đo các vòng (eo, ngực, mông)",
                 "Xem biểu đồ tiến trình",
@@ -30,7 +30,7 @@ export default function Dashboard() {
             description: "Khám phá và lựa chọn các bài tập, kế hoạch tập luyện phù hợp với mục tiêu của bạn.",
             icon: ListChecks,
             color: "text-orange-600",
-            features: [ // Added features list
+            features: [
                 "Thư viện bài tập đa dạng",
                 "Tạo kế hoạch tập luyện tùy chỉnh",
                 "Lọc bài tập theo nhóm cơ, dụng cụ",

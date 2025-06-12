@@ -27,6 +27,14 @@ export const useBodyTrackQuery = (id: number) => {
   });
 };
 
+export const useBodyTracksByUserQuery = (userId: number) => {
+  return useQuery({
+    queryKey: bodyTrackKeys.list({ userId }),
+    queryFn: () => bodyTrackService.getBodyTracksByUser(userId),
+    enabled: !!userId,
+  });
+};
+
 export const useCreateBodyTrackMutation = () => {
   const queryClient = useQueryClient();
   const { success, error: showError } = useToast();
