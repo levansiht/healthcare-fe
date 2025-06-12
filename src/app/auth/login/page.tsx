@@ -22,18 +22,23 @@ export default function LoginPage() {
   const { login, loading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
+    username: "",
     password: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+    const buttonName = submitter?.name;
     try {
-      await login(formData);
-      router.push("/dashboard"); // Redirect to dashboard after successful login
+     if (buttonName === "adminLogin") {
+        await login(formData, "Admin");
+        return router.push("/admin");
+      } else {
+        await login(formData, "User");
+        return router.push("/dashboard");
+      }
     } catch (error) {
-      // Error is handled by the useAuth hook
       console.error("Login failed:", error);
     }
   };
@@ -122,17 +127,17 @@ export default function LoginPage() {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-2">
                   <Label
-                    htmlFor="email"
+                    htmlFor="username"
                     className="text-sm font-medium text-gray-700"
                   >
-                    Email
+                    Username
                   </Label>
                   <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="example@healthcare.com"
-                    value={formData.email}
+                    id="username"
+                    name="username"
+                    type="text"
+                    placeholder="Username"
+                    value={formData.username}
                     onChange={handleInputChange}
                     required
                     className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
@@ -191,6 +196,7 @@ export default function LoginPage() {
 
                 <Button
                   type="submit"
+                  name="clientLogin" // Add name attribute
                   className={cn(
                     "w-full h-12 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02]",
                     loading && "opacity-70"
@@ -206,6 +212,25 @@ export default function LoginPage() {
                     "Đăng nhập"
                   )}
                 </Button>
+                <Button
+                  type="submit"
+                  name="adminLogin" // Add name attribute
+                  className={cn(
+                    "w-full h-12 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02]",
+                    loading && "opacity-70"
+                  )}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Đang đăng nhập...</span>
+                    </div>
+                  ) : (
+                    "Đăng nhập cho Admin"
+                  )}
+                </Button>
+
               </form>
 
               <div className="relative">

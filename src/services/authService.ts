@@ -7,26 +7,43 @@ import {
   RefreshTokenRequest,
   RefreshTokenResponse,
   User,
+  RoleEnum,
 } from "@/types/api";
+
 
 export const authService = {
   // Login user
-  async login(credentials: LoginRequest): Promise<LoginResponse> {
-    // Healthcare API might not have auth endpoints - this is a placeholder
-    // In a real implementation, this would make an API call
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _ = credentials;
-    throw new Error("Authentication not implemented in healthcare API");
+ async login(credentials: LoginRequest, loginType: RoleEnum): Promise<LoginResponse> {
+    try {
+      const endpoint = loginType === "Admin"
+        ? API_ENDPOINTS.auth.loginAdmin
+        : API_ENDPOINTS.auth.login;
+
+      const response = await apiClient.post<LoginResponse>(
+        endpoint,
+        credentials
+      );
+      console.log("Login response:", response);
+
+      return response;
+    } catch (error) {
+      throw new Error(`Login failed for ${loginType}: ` + (error as Error).message);
+    }
   },
 
   // Register new user
   async register(
     userData: RegisterRequest
   ): Promise<{ user: User; message: string }> {
-    // Healthcare API might not have auth endpoints - this is a placeholder
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _ = userData;
-    throw new Error("Registration not implemented in healthcare API");
+    try {
+      const response = await apiClient.post<{ user: User; message: string }>(
+        API_ENDPOINTS.auth.register,
+        userData
+      );
+      return response;
+    } catch (error) {
+      throw new Error("Registration failed: " + error);
+    }
   },
 
   // Logout user

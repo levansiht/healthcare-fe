@@ -15,16 +15,19 @@ import {
 } from "@/components/ui/card";
 import { Eye, EyeOff, Heart, Shield, Users, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useApi";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { register } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
+    // firstName: "",
+    // lastName: "",
+    // email: "",
+    username: "",
     password: "",
     confirmPassword: "",
     agreeToTerms: false,
@@ -47,11 +50,13 @@ export default function RegisterPage() {
       return;
     }
 
-    // Simulate API call
+    // Simulate API call    
     await new Promise((resolve) => setTimeout(resolve, 2000));
-
+    const registerData = formData as Omit<typeof formData, "confirmPassword" | "agreeToTerms">;
+    console.log("Registering user:", registerData);
+    
+    await register(registerData);
     // Handle register logic here
-    console.log("Register data:", formData);
     setIsLoading(false);
 
     // Redirect to verification page or login
@@ -113,7 +118,7 @@ export default function RegisterPage() {
 
             <CardContent className="space-y-6">
               <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="grid grid-cols-2 gap-3">
+                {/* <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <Label
                       htmlFor="firstName"
@@ -150,21 +155,21 @@ export default function RegisterPage() {
                       className="h-12 border-gray-300 focus:border-green-500 focus:ring-green-500 rounded-lg"
                     />
                   </div>
-                </div>
+                </div> */}
 
                 <div className="space-y-2">
                   <Label
-                    htmlFor="email"
+                    htmlFor="username"
                     className="text-sm font-medium text-gray-700"
                   >
-                    Email
+                    Username
                   </Label>
                   <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="example@healthcare.com"
-                    value={formData.email}
+                    id="username"
+                    name="username"
+                    type="text"
+                    placeholder="Your Username"
+                    value={formData.username}
                     onChange={handleInputChange}
                     required
                     className="h-12 border-gray-300 focus:border-green-500 focus:ring-green-500 rounded-lg"

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next"; // Thêm Viewport vào import
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -27,7 +27,16 @@ export const metadata: Metadata = {
     "health tracking",
   ],
   authors: [{ name: "HealthCare Pro Team" }],
-  viewport: "width=device-width, initial-scale=1",
+};
+
+// Export viewport riêng
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  // Bạn có thể thêm các thuộc tính viewport khác ở đây nếu cần
+  // maximumScale: 1,
+  // userScalable: false,
+  // themeColor: '#ffffff',
 };
 
 export default function RootLayout({

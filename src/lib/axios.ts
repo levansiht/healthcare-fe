@@ -43,9 +43,10 @@ api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // Add auth tokn if available
     const token = getAuthToken();
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-    }
+    }    
 
     config.metadata = { startTime: new Date() };
 
@@ -58,7 +59,6 @@ api.interceptors.request.use(
         }
       );
     }
-
     return config;
   },
   (error: AxiosError) => {
@@ -291,10 +291,34 @@ export const apiClient = {
 };
 
 export const authUtils = {
-  setTokens(accessToken: string, refreshToken: string): void {
-    setAuthToken(accessToken);
+  async setTokens(accessToken: string): Promise<void> {
+     setAuthToken(accessToken);
+    // if (typeof window !== "undefined") {
+    //   localStorage.setItem("refresh-token", refreshToken);
+    // }        
+     if (typeof window !== "undefined") {
+      try {
+        const { setAuthCookieAction } = await import('@/app/actions/authActions'); 
+        const result = await setAuthCookieAction(accessToken);
+        if (!result.success) {
+          console.error("Failed to set auth cookie via Server Action:", result.message);
+        }
+      } catch (e) {
+        console.error("Error invoking setAuthCookieAction:", e);
+      }
+    }
+  },
+  async setRoleUser(role: string): Promise<void> {
     if (typeof window !== "undefined") {
-      localStorage.setItem("refresh-token", refreshToken);
+      try {
+        const { setRoleUserCookieAction } = await import('@/app/actions/authActions'); 
+        const result = await setRoleUserCookieAction(role);
+        if (!result.success) {
+          console.error("Failed to set role cookie via Server Action:", result.message);
+        }
+      } catch (e) {
+        console.error("Error invoking setRoleUserCookieAction:", e);
+      }
     }
   },
 

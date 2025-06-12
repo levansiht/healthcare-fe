@@ -4,8 +4,12 @@ export const API_BASE_URL =
 export const API_ENDPOINTS = {
   // Auth endpoints (placeholder - healthcare API may not have these)
   auth: {
-    login: "/auth/login",
-    register: "/auth/register",
+    // login: "/auth/login",
+    // register: "/auth/register",
+    login: "/client/login",
+    loginAdmin: "/admin/login",
+    
+    register: "/client/signup",
     logout: "/auth/logout",
     refresh: "/auth/refresh",
     me: "/auth/me",

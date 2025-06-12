@@ -25,6 +25,7 @@ export interface PaginatedResponse<T> {
 
 // Healthcare API Types
 export type MembershipTier = "Basic" | "Premium" | "Pro";
+export type RoleEnum = "User" | "Admin" ;
 export type MuscleGroup =
   | "Chest"
   | "Back"
@@ -37,9 +38,18 @@ export type MuscleGroup =
 
 // User Types (Healthcare API)
 export interface User {
+  // id: number;
+  // username: string;
+  // membershipTier: MembershipTier;
   id: number;
   username: string;
+  email?: string;
+  dateOfBirth?: Date;
+  phoneNumber?: string;
+  avaUrl?: string;
   membershipTier: MembershipTier;
+  role: RoleEnum;
+  // token: string;
 }
 
 export interface CreateUserRequest {
@@ -165,26 +175,38 @@ export interface UpdateBodyTrackRequest {
 
 // Auth Types (for future use)
 export interface LoginRequest {
-  email: string;
+  username: string;
   password: string;
   rememberMe?: boolean;
 }
 
 export interface LoginResponse {
-  user: User;
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-}
+  // user: User;
+  // accessToken: string;
+  // refreshToken: string;
+  // token: string;
+  // expiresIn: number;
+  id: number;
+  username: string;
+  email?: string;
+  dateOfBirth?: Date;
+  phoneNumber?: string;
+  avaUrl?: string;
+  membershipTier: MembershipTier;
+  role: RoleEnum;
+  token: string;
+  status?: number
+  message?: string;}
 
 export interface RegisterRequest {
-  email: string;
+  username: string;
   password: string;
-  firstName: string;
-  lastName: string;
-  dateOfBirth: string;
-  gender: "male" | "female" | "other";
-  phoneNumber?: string;
+  // email: string;
+  // firstName: string;
+  // lastName: string;
+  // dateOfBirth: string;
+  // gender: "male" | "female" | "other";
+  // phoneNumber?: string;
 }
 
 export interface RefreshTokenRequest {
