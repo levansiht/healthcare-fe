@@ -35,7 +35,7 @@ export const workoutService = {
       date: string;
       exercises: {
         exerciseId: number;
-        sets: { reps: number; weight: number }[];
+        sets: { reps: number; weight: number; restTime?: number }[];
       }[];
     }
   ): Promise<Session & { sets: Set[] }> {
@@ -51,6 +51,7 @@ export const workoutService = {
         const set = await setService.createSet({
           reps: setData.reps,
           weight: setData.weight,
+          restTime: setData.restTime || 60, // Default to 60 seconds if not provided
           exerciseId: exercise.exerciseId,
           sessionId: session.id,
         });

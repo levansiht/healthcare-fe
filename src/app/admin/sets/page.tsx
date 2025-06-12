@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Zap,
@@ -70,6 +70,16 @@ import { useExercisesQuery } from "@/hooks/useExercisesQuery";
 import { usePlansQuery } from "@/hooks/usePlansQuery";
 
 export default function SetsPage() {
+  return (
+    <Suspense
+      fallback={<div className="container mx-auto p-6">Đang tải...</div>}
+    >
+      <SetsContent />
+    </Suspense>
+  );
+}
+
+function SetsContent() {
   const searchParams = useSearchParams();
   const initialSessionId = searchParams.get("sessionId") || "all";
 
