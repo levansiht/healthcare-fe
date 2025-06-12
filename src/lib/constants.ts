@@ -8,7 +8,7 @@ export const API_ENDPOINTS = {
     // register: "/auth/register",
     login: "/client/login",
     loginAdmin: "/admin/login",
-    
+
     register: "/client/signup",
     logout: "/auth/logout",
     refresh: "/auth/refresh",
@@ -88,8 +88,8 @@ export const FITNESS_GOALS = {
 // Enums from backend API
 export const MEMBERSHIP_TIERS = {
   BASIC: "Basic",
-  PREMIUM: "Premium",
-  PRO: "Pro",
+  ADVANCE: "Advance",
+  HIGH: "High",
 } as const;
 
 export const MUSCLE_GROUPS = {

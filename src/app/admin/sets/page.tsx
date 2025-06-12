@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Zap,
   Plus,
@@ -11,6 +12,7 @@ import {
   Target,
   Calendar,
   Dumbbell,
+  Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,9 +67,14 @@ import {
 } from "@/hooks/useSetsQuery";
 import { useSessionsQuery } from "@/hooks/useSessionsQuery";
 import { useExercisesQuery } from "@/hooks/useExercisesQuery";
+import { usePlansQuery } from "@/hooks/usePlansQuery";
 
 export default function SetsPage() {
-  const [selectedSessionId, setSelectedSessionId] = useState<string>("all");
+  const searchParams = useSearchParams();
+  const initialSessionId = searchParams.get("sessionId") || "all";
+
+  const [selectedSessionId, setSelectedSessionId] =
+    useState<string>(initialSessionId);
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -76,12 +83,21 @@ export default function SetsPage() {
   const { data: sets = [], isLoading: loading } = useSetsQuery();
   const { data: sessions = [] } = useSessionsQuery();
   const { data: exercises = [] } = useExercisesQuery();
+  const { data: plans = [] } = usePlansQuery();
   const createSetMutation = useCreateSetMutation();
   const updateSetMutation = useUpdateSetMutation();
   const deleteSetMutation = useDeleteSetMutation();
 
   const createForm = useForm<CreateSetRequest>();
   const editForm = useForm<UpdateSetRequest>();
+
+  useEffect(() => {
+    const sessionId = searchParams.get("sessionId");
+    if (sessionId) {
+      setSelectedSessionId(sessionId);
+      createForm.setValue("sessionId", parseInt(sessionId));
+    }
+  }, [searchParams, createForm]);
 
   const filteredSets = useMemo(() => {
     let filtered = sets || [];
@@ -103,7 +119,14 @@ export default function SetsPage() {
 
   const getSessionName = (sessionId: number) => {
     const session = sessions.find((s) => s.id === sessionId);
-    return session?.name || `Session ${sessionId}`;
+    if (!session) return `Session #${sessionId}`;
+
+    const planName =
+      plans.find((p) => p.id === session.planId)?.name ||
+      `Plan ${session.planId}`;
+    const dateStr = new Date(session.date).toLocaleDateString("vi-VN");
+
+    return session.name || `${planName} - ${dateStr}`;
   };
 
   const getExerciseName = (exerciseId: number) => {
@@ -144,20 +167,41 @@ export default function SetsPage() {
       id: set.id,
       reps: set.reps,
       weight: set.weight,
+      restTime: set.restTime,
     });
     setIsEditDialogOpen(true);
   };
 
   return (
     <div className="container mx-auto p-6">
+      {/* Warning for invalid sessionId */}
+      {initialSessionId !== "all" &&
+        sessions.length > 0 &&
+        !sessions.some((s) => s.id.toString() === initialSessionId) && (
+          <Card className="mb-6 border-yellow-200 bg-yellow-50">
+            <CardContent className="pt-6">
+              <p className="text-yellow-800">
+                ⚠️ Phiên tập với ID {initialSessionId} không tồn tại. Hiển thị
+                tất cả sets thay thế.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <Zap className="h-8 w-8 text-orange-600" />
           <div>
-            <h1 className="text-3xl font-bold">Quản lý Set</h1>
+            <h1 className="text-3xl font-bold">
+              {initialSessionId !== "all" && sessions.length > 0
+                ? `Sets - ${getSessionName(parseInt(initialSessionId))}`
+                : "Quản lý Set"}
+            </h1>
             <p className="text-gray-600">
-              Quản lý chi tiết các set trong phiên tập
+              {initialSessionId !== "all"
+                ? "Quản lý sets của phiên tập này"
+                : "Quản lý chi tiết các set trong phiên tập"}
             </p>
           </div>
         </div>
@@ -203,6 +247,19 @@ export default function SetsPage() {
                   />
                 </div>
                 <div>
+                  <Label htmlFor="restTime">Thời gian nghỉ (giây)</Label>
+                  <Input
+                    id="restTime"
+                    type="number"
+                    min="0"
+                    {...createForm.register("restTime", {
+                      required: true,
+                      valueAsNumber: true,
+                    })}
+                    placeholder="Nhập thời gian nghỉ"
+                  />
+                </div>
+                <div>
                   <Label htmlFor="exerciseId">Bài tập</Label>
                   <Select
                     onValueChange={(value) =>
@@ -227,6 +284,9 @@ export default function SetsPage() {
                 <div>
                   <Label htmlFor="sessionId">Phiên tập</Label>
                   <Select
+                    value={
+                      initialSessionId !== "all" ? initialSessionId : undefined
+                    }
                     onValueChange={(value) =>
                       createForm.setValue("sessionId", parseInt(value))
                     }
@@ -240,7 +300,7 @@ export default function SetsPage() {
                           key={session.id}
                           value={session.id.toString()}
                         >
-                          {session.name}
+                          {getSessionName(session.id)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -278,7 +338,7 @@ export default function SetsPage() {
                   <SelectItem value="all">Tất cả phiên tập</SelectItem>
                   {(sessions || []).map((session) => (
                     <SelectItem key={session.id} value={session.id.toString()}>
-                      {session.name}
+                      {getSessionName(session.id)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -347,9 +407,17 @@ export default function SetsPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">
-              {filteredSets?.length || 0}
+              {(sets?.length || 0) > 0
+                ? (
+                    (sets || []).reduce(
+                      (sum, set) => sum + (set.restTime || 0),
+                      0
+                    ) / (sets?.length || 1)
+                  ).toFixed(0)
+                : "0"}
+              s
             </div>
-            <p className="text-sm text-gray-600">Hiển thị</p>
+            <p className="text-sm text-gray-600">TB thời gian nghỉ</p>
           </CardContent>
         </Card>
       </div>
@@ -371,6 +439,7 @@ export default function SetsPage() {
                   <TableHead>Phiên tập</TableHead>
                   <TableHead>Số lần lặp</TableHead>
                   <TableHead>Trọng lượng</TableHead>
+                  <TableHead>Thời gian nghỉ</TableHead>
                   <TableHead>Nhóm cơ</TableHead>
                   <TableHead>ID</TableHead>
                   <TableHead className="text-right">Thao tác</TableHead>
@@ -406,6 +475,14 @@ export default function SetsPage() {
                         <Weight className="h-4 w-4 text-green-500" />
                         <span className="font-semibold text-green-600">
                           {set.weight}kg
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-purple-500" />
+                        <span className="font-semibold text-purple-600">
+                          {set.restTime}s
                         </span>
                       </div>
                     </TableCell>
@@ -483,6 +560,19 @@ export default function SetsPage() {
                     valueAsNumber: true,
                   })}
                   placeholder="Nhập trọng lượng"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-restTime">Thời gian nghỉ (giây)</Label>
+                <Input
+                  id="edit-restTime"
+                  type="number"
+                  min="0"
+                  {...editForm.register("restTime", {
+                    required: true,
+                    valueAsNumber: true,
+                  })}
+                  placeholder="Nhập thời gian nghỉ"
                 />
               </div>
             </div>

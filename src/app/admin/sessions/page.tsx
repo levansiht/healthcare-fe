@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   Calendar,
   Plus,
@@ -10,6 +10,7 @@ import {
   Clock,
   MoreHorizontal,
   Target,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,6 +74,8 @@ export default function SessionsPage() {
   const [selectedPlanId, setSelectedPlanId] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [sessionToDelete, setSessionToDelete] = useState<Session | null>(null);
 
   const { data: sessions = [], isLoading: loading } = useSessionsQuery();
   const { data: plans = [] } = usePlansQuery();
@@ -83,12 +86,22 @@ export default function SessionsPage() {
   const createForm = useForm<CreateSessionRequest>();
   const editForm = useForm<UpdateSessionRequest>();
 
+  const getPlanName = useCallback(
+    (planId: number) => {
+      const plan = plans.find((p) => p.id === planId);
+      return plan?.name || `Plan ${planId}`;
+    },
+    [plans]
+  );
+
   const filteredSessions = useMemo(() => {
     let filtered = sessions || [];
 
     if (searchTerm) {
       filtered = filtered.filter((session) =>
-        session.name.toLowerCase().includes(searchTerm.toLowerCase())
+        getPlanName(session.planId)
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
       );
     }
 
@@ -99,12 +112,7 @@ export default function SessionsPage() {
     }
 
     return filtered;
-  }, [sessions, searchTerm, selectedPlanId]);
-
-  const getPlanName = (planId: number) => {
-    const plan = plans.find((p) => p.id === planId);
-    return plan?.name || `Plan ${planId}`;
-  };
+  }, [sessions, searchTerm, selectedPlanId, getPlanName]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("vi-VN", {
@@ -136,15 +144,26 @@ export default function SessionsPage() {
     });
   };
 
-  const handleDeleteSession = (id: number) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa phiên tập này?")) return;
-    deleteSessionMutation.mutate(id);
+  const handleDeleteSession = (session: Session) => {
+    setSessionToDelete(session);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteSession = () => {
+    if (sessionToDelete) {
+      deleteSessionMutation.mutate(sessionToDelete.id);
+      setIsDeleteDialogOpen(false);
+      setSessionToDelete(null);
+    }
+  };
+
+  const handleViewSets = (sessionId: number) => {
+    window.open(`/admin/sets?sessionId=${sessionId}`, "_blank");
   };
 
   const handleEditSession = (session: Session) => {
     editForm.reset({
       id: session.id,
-      name: session.name,
       date: session.date,
     });
     setIsEditDialogOpen(true);
@@ -177,14 +196,6 @@ export default function SessionsPage() {
             </DialogHeader>
             <form onSubmit={createForm.handleSubmit(handleCreateSession)}>
               <div className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Tên phiên tập</Label>
-                  <Input
-                    id="name"
-                    {...createForm.register("name", { required: true })}
-                    placeholder="Nhập tên phiên tập"
-                  />
-                </div>
                 <div>
                   <Label htmlFor="date">Ngày tập</Label>
                   <Input
@@ -236,7 +247,7 @@ export default function SessionsPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Tìm kiếm phiên tập..."
+                  placeholder="Tìm kiếm theo kế hoạch..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -311,7 +322,6 @@ export default function SessionsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Tên phiên tập</TableHead>
                   <TableHead>Kế hoạch</TableHead>
                   <TableHead>Ngày tập</TableHead>
                   <TableHead>Trạng thái</TableHead>
@@ -322,9 +332,6 @@ export default function SessionsPage() {
               <TableBody>
                 {(filteredSessions || []).map((session) => (
                   <TableRow key={session.id}>
-                    <TableCell className="font-medium">
-                      {session.name}
-                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Target className="h-4 w-4 text-gray-400" />
@@ -359,6 +366,13 @@ export default function SessionsPage() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
                           <DropdownMenuItem
+                            onClick={() => handleViewSets(session.id)}
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            Xem Sets
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
                             onClick={() => handleEditSession(session)}
                           >
                             <Edit className="mr-2 h-4 w-4" />
@@ -366,7 +380,7 @@ export default function SessionsPage() {
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
-                            onClick={() => handleDeleteSession(session.id)}
+                            onClick={() => handleDeleteSession(session)}
                             className="text-red-600"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
@@ -393,14 +407,6 @@ export default function SessionsPage() {
           <form onSubmit={editForm.handleSubmit(handleUpdateSession)}>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="edit-name">Tên phiên tập</Label>
-                <Input
-                  id="edit-name"
-                  {...editForm.register("name", { required: true })}
-                  placeholder="Nhập tên phiên tập"
-                />
-              </div>
-              <div>
                 <Label htmlFor="edit-date">Ngày tập</Label>
                 <Input
                   id="edit-date"
@@ -420,6 +426,47 @@ export default function SessionsPage() {
               <Button type="submit">Cập nhật</Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Xác nhận xóa phiên tập</DialogTitle>
+            <DialogDescription>
+              Bạn có chắc chắn muốn xóa phiên tập này không? Hành động này không
+              thể hoàn tác.
+            </DialogDescription>
+          </DialogHeader>
+          {sessionToDelete && (
+            <div className="py-4">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Target className="h-4 w-4" />
+                <span>Kế hoạch: {getPlanName(sessionToDelete.planId)}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                <Clock className="h-4 w-4" />
+                <span>Ngày tập: {formatDate(sessionToDelete.date)}</span>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
+              Hủy
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={confirmDeleteSession}
+            >
+              Xóa phiên tập
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

@@ -25,7 +25,7 @@ export interface PaginatedResponse<T> {
 
 // Healthcare API Types
 export type MembershipTier = "Basic" | "Premium" | "Pro";
-export type RoleEnum = "User" | "Admin" ;
+export type RoleEnum = "User" | "Admin";
 export type MuscleGroup =
   | "Chest"
   | "Back"
@@ -92,14 +92,20 @@ export interface Exercise {
   id: number;
   name: string;
   description: string;
-  muscle: MuscleGroup;
+  muscle: MuscleGroup; // Keep for backward compatibility
+  targetMuscle1: MuscleGroup;
+  targetMuscle2?: MuscleGroup;
+  targetMuscle3?: MuscleGroup;
   imageUrl?: string;
 }
 
 export interface CreateExerciseRequest {
   name: string;
   description: string;
-  muscle: MuscleGroup;
+  muscle: MuscleGroup; // Keep for backward compatibility
+  targetMuscle1: MuscleGroup;
+  targetMuscle2?: MuscleGroup;
+  targetMuscle3?: MuscleGroup;
   imageUrl?: string;
 }
 
@@ -107,7 +113,10 @@ export interface UpdateExerciseRequest {
   id: number;
   name?: string;
   description?: string;
-  muscle?: MuscleGroup;
+  muscle?: MuscleGroup; // Keep for backward compatibility
+  targetMuscle1?: MuscleGroup;
+  targetMuscle2?: MuscleGroup;
+  targetMuscle3?: MuscleGroup;
   imageUrl?: string;
 }
 
@@ -136,6 +145,7 @@ export interface Set {
   id: number;
   reps: number;
   weight: number;
+  restTime: number; // seconds
   exerciseId: number;
   sessionId: number;
 }
@@ -143,6 +153,7 @@ export interface Set {
 export interface CreateSetRequest {
   reps: number;
   weight: number;
+  restTime: number; // seconds
   exerciseId: number;
   sessionId: number;
 }
@@ -151,6 +162,7 @@ export interface UpdateSetRequest {
   id: number;
   reps?: number;
   weight?: number;
+  restTime?: number; // seconds
 }
 
 // BodyTrack Types
@@ -197,8 +209,9 @@ export interface LoginResponse {
   membershipTier: MembershipTier;
   role: RoleEnum;
   token: string;
-  status?: number
-  message?: string;}
+  status?: number;
+  message?: string;
+}
 
 export interface RegisterRequest {
   username: string;

@@ -8,6 +8,7 @@ import {
   Edit,
   Trash2,
   MoreHorizontal,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -118,7 +119,11 @@ export default function ExercisesPage() {
 
     if (selectedMuscle !== "all") {
       filtered = filtered.filter(
-        (exercise) => exercise.muscle === selectedMuscle
+        (exercise) =>
+          exercise.muscle === selectedMuscle ||
+          exercise.targetMuscle1 === selectedMuscle ||
+          exercise.targetMuscle2 === selectedMuscle ||
+          exercise.targetMuscle3 === selectedMuscle
       );
     }
 
@@ -154,6 +159,9 @@ export default function ExercisesPage() {
       name: exercise.name,
       description: exercise.description,
       muscle: exercise.muscle,
+      targetMuscle1: exercise.targetMuscle1,
+      targetMuscle2: exercise.targetMuscle2,
+      targetMuscle3: exercise.targetMuscle3,
       imageUrl: exercise.imageUrl,
     });
     setIsEditDialogOpen(true);
@@ -205,16 +213,89 @@ export default function ExercisesPage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="muscle">Nhóm cơ</Label>
+                  <Label htmlFor="muscle">Nhóm cơ chính (tương thích cũ)</Label>
                   <Select
                     onValueChange={(value) =>
                       createForm.setValue("muscle", value as MuscleGroup)
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Chọn nhóm cơ" />
+                      <SelectValue placeholder="Chọn nhóm cơ chính" />
                     </SelectTrigger>
                     <SelectContent>
+                      {muscleGroups.map((muscle) => (
+                        <SelectItem key={muscle} value={muscle}>
+                          {muscle}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="targetMuscle1">
+                    Nhóm cơ mục tiêu 1 <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    onValueChange={(value) =>
+                      createForm.setValue("targetMuscle1", value as MuscleGroup)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Chọn nhóm cơ mục tiêu 1" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {muscleGroups.map((muscle) => (
+                        <SelectItem key={muscle} value={muscle}>
+                          {muscle}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="targetMuscle2">
+                    Nhóm cơ mục tiêu 2 (tuỳ chọn)
+                  </Label>
+                  <Select
+                    value={createForm.watch("targetMuscle2") || "none"}
+                    onValueChange={(value) =>
+                      createForm.setValue(
+                        "targetMuscle2",
+                        value === "none" ? undefined : (value as MuscleGroup)
+                      )
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Chọn nhóm cơ mục tiêu 2" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Không chọn</SelectItem>
+                      {muscleGroups.map((muscle) => (
+                        <SelectItem key={muscle} value={muscle}>
+                          {muscle}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="targetMuscle3">
+                    Nhóm cơ mục tiêu 3 (tuỳ chọn)
+                  </Label>
+                  <Select
+                    value={createForm.watch("targetMuscle3") || "none"}
+                    onValueChange={(value) =>
+                      createForm.setValue(
+                        "targetMuscle3",
+                        value === "none" ? undefined : (value as MuscleGroup)
+                      )
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Chọn nhóm cơ mục tiêu 3" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Không chọn</SelectItem>
                       {muscleGroups.map((muscle) => (
                         <SelectItem key={muscle} value={muscle}>
                           {muscle}
@@ -297,9 +378,19 @@ export default function ExercisesPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">
-              {new Set(exercises?.map((e) => e.muscle) || []).size}
+              {(() => {
+                const allMuscles = new Set<MuscleGroup>();
+                exercises?.forEach((exercise) => {
+                  allMuscles.add(exercise.targetMuscle1);
+                  if (exercise.targetMuscle2)
+                    allMuscles.add(exercise.targetMuscle2);
+                  if (exercise.targetMuscle3)
+                    allMuscles.add(exercise.targetMuscle3);
+                });
+                return allMuscles.size;
+              })()}
             </div>
-            <p className="text-sm text-gray-600">Nhóm cơ</p>
+            <p className="text-sm text-gray-600">Nhóm cơ mục tiêu</p>
           </CardContent>
         </Card>
         <Card>
@@ -336,9 +427,10 @@ export default function ExercisesPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Tên bài tập</TableHead>
-                  <TableHead>Nhóm cơ</TableHead>
+                  <TableHead>Nhóm cơ chính</TableHead>
+                  <TableHead>Nhóm cơ mục tiêu</TableHead>
                   <TableHead>Mô tả</TableHead>
-                  <TableHead>Hình ảnh</TableHead>
+                  <TableHead>URL hình ảnh</TableHead>
                   <TableHead className="text-right">Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
@@ -353,14 +445,52 @@ export default function ExercisesPage() {
                         {exercise.muscle}
                       </Badge>
                     </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        <Badge
+                          className={muscleGroupColors[exercise.targetMuscle1]}
+                          variant="secondary"
+                        >
+                          {exercise.targetMuscle1}
+                        </Badge>
+                        {exercise.targetMuscle2 && (
+                          <Badge
+                            className={
+                              muscleGroupColors[exercise.targetMuscle2]
+                            }
+                            variant="secondary"
+                          >
+                            {exercise.targetMuscle2}
+                          </Badge>
+                        )}
+                        {exercise.targetMuscle3 && (
+                          <Badge
+                            className={
+                              muscleGroupColors[exercise.targetMuscle3]
+                            }
+                            variant="secondary"
+                          >
+                            {exercise.targetMuscle3}
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell className="max-w-xs truncate">
                       {exercise.description}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="max-w-xs">
                       {exercise.imageUrl ? (
-                        <Badge variant="secondary">Có</Badge>
+                        <a
+                          href={exercise.imageUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 underline flex items-center gap-1"
+                        >
+                          <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                          <span className="truncate">{exercise.imageUrl}</span>
+                        </a>
                       ) : (
-                        <Badge variant="outline">Không</Badge>
+                        <span className="text-gray-400 italic">Không có</span>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
@@ -423,7 +553,9 @@ export default function ExercisesPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="edit-muscle">Nhóm cơ</Label>
+                <Label htmlFor="edit-muscle">
+                  Nhóm cơ chính (tương thích cũ)
+                </Label>
                 <Select
                   value={editForm.watch("muscle")}
                   onValueChange={(value) =>
@@ -431,9 +563,83 @@ export default function ExercisesPage() {
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Chọn nhóm cơ" />
+                    <SelectValue placeholder="Chọn nhóm cơ chính" />
                   </SelectTrigger>
                   <SelectContent>
+                    {muscleGroups.map((muscle) => (
+                      <SelectItem key={muscle} value={muscle}>
+                        {muscle}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="edit-targetMuscle1">
+                  Nhóm cơ mục tiêu 1 <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={editForm.watch("targetMuscle1")}
+                  onValueChange={(value) =>
+                    editForm.setValue("targetMuscle1", value as MuscleGroup)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn nhóm cơ mục tiêu 1" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {muscleGroups.map((muscle) => (
+                      <SelectItem key={muscle} value={muscle}>
+                        {muscle}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="edit-targetMuscle2">
+                  Nhóm cơ mục tiêu 2 (tuỳ chọn)
+                </Label>
+                <Select
+                  value={editForm.watch("targetMuscle2") || "none"}
+                  onValueChange={(value) =>
+                    editForm.setValue(
+                      "targetMuscle2",
+                      value === "none" ? undefined : (value as MuscleGroup)
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn nhóm cơ mục tiêu 2" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Không chọn</SelectItem>
+                    {muscleGroups.map((muscle) => (
+                      <SelectItem key={muscle} value={muscle}>
+                        {muscle}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="edit-targetMuscle3">
+                  Nhóm cơ mục tiêu 3 (tuỳ chọn)
+                </Label>
+                <Select
+                  value={editForm.watch("targetMuscle3") || "none"}
+                  onValueChange={(value) =>
+                    editForm.setValue(
+                      "targetMuscle3",
+                      value === "none" ? undefined : (value as MuscleGroup)
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn nhóm cơ mục tiêu 3" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Không chọn</SelectItem>
                     {muscleGroups.map((muscle) => (
                       <SelectItem key={muscle} value={muscle}>
                         {muscle}
