@@ -28,7 +28,7 @@ import {
 } from "@/hooks/useSetsQuery";
 import { useExercisesQuery } from "@/hooks/useExercisesQuery";
 import {
-  useSessionsQuery,
+  useSessionsByUserQuery,
   useCreateSessionMutation,
 } from "@/hooks/useSessionsQuery";
 import { usePlansQuery } from "@/hooks/usePlansQuery";
@@ -156,6 +156,24 @@ function AddSessionDialog({ onSuccess }: { onSuccess: () => void }) {
   );
 }
 
+export const GetUserId = () => {
+  const [userId, setUserId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        setUserId(user.id);
+      } catch (error) {
+        console.error("Lỗi khi parse localStorage user:", error);
+      }
+    }
+  }, []);
+
+  return userId;
+}
+
 // ==================== Add Set Dialog Component ====================
 function AddSetDialog({ onSuccess }: { onSuccess: () => void }) {
   const [open, setOpen] = useState(false);
@@ -169,7 +187,12 @@ function AddSetDialog({ onSuccess }: { onSuccess: () => void }) {
 
   const createSetMutation = useCreateSetMutation();
   const { data: exercises, isLoading: exercisesLoading } = useExercisesQuery();
-  const { data: sessions, isLoading: sessionsLoading } = useSessionsQuery();
+  console.log("check: ", exercises);
+  
+  const userId = GetUserId();
+  console.log("userId: ", userId);
+  
+  const { data: sessions, isLoading: sessionsLoading } = useSessionsByUserQuery(userId || 0);
 
   const fieldLabels = {
     weight: "Trọng lượng (kg)",
