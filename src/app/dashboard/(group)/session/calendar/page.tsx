@@ -23,11 +23,20 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   useCreateSetMutation,
   useDeleteSetMutation,
   useSetQueryByUserId,
   useUpdateSetMutation,
 } from '@/hooks/useSetsQuery';
+import { useExercisesQuery } from '@/hooks/useExercisesQuery';
+import { useSessionsQuery } from '@/hooks/useSessionsQuery';
 import { UpdateSetRequest } from '@/services';
 
 interface SetType {
@@ -37,37 +46,121 @@ interface SetType {
   restTime: number;
   exerciseId: number;
   sessionId: number;
-  date: string; 
+  date: string;
+  name?: string;          // Tên bài tập
+  sessionName?: string;   // Thêm tên phiên tập
 }
 
 // ==================== Add Set Dialog Component ====================
 function AddSetDialog({ onSuccess }: { onSuccess: () => void }) {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
-    weight: '',
-    reps: '',
-    restTime: '',
-    exerciseId: '',
-    sessionId: '',
+    weight: '0',
+    reps: '10',
+    restTime: '90',
+    exerciseId: '4',
+    sessionId: '2',
   });
 
   const createSetMutation = useCreateSetMutation();
+  const { data: exercises, isLoading: exercisesLoading } = useExercisesQuery();
+  const { data: sessions, isLoading: sessionsLoading } = useSessionsQuery();
+
+  const fieldLabels = {
+    weight: 'Trọng lượng (kg)',
+    reps: 'Số lần lặp',
+    restTime: 'Thời gian nghỉ (giây)',
+    exerciseId: 'Bài tập',
+    sessionId: 'Phiên tập',
+  };
+
+  const fieldPlaceholders = {
+    weight: 'Ví dụ: 0, 10, 20...',
+    reps: 'Ví dụ: 8, 10, 12...',
+    restTime: 'Ví dụ: 60, 90, 120...',
+  };
 
   const handleSubmit = async () => {
     try {
-      await createSetMutation.mutateAsync({
-        weight: parseFloat(formData.weight),
-        reps: parseInt(formData.reps),
-        restTime: parseInt(formData.restTime),
-        exerciseId: parseInt(formData.exerciseId),
-        sessionId: parseInt(formData.sessionId),
-      });
-      setFormData({ weight: '', reps: '', restTime: '', exerciseId: '', sessionId: '' });
+      const submitData = {
+        weight: parseFloat(formData.weight) || 0,
+        reps: parseInt(formData.reps) || 1,
+        restTime: parseInt(formData.restTime) || 60,
+        exerciseId: parseInt(formData.exerciseId) || 1,
+        sessionId: parseInt(formData.sessionId) || 1,
+      };
+
+      await createSetMutation.mutateAsync(submitData);
+      setFormData({ weight: '0', reps: '10', restTime: '90', exerciseId: '4', sessionId: '2' });
       setOpen(false);
       onSuccess();
     } catch (error) {
       console.error('Lỗi thêm set:', error);
     }
+  };
+
+  const renderField = (field: keyof typeof formData) => {
+    if (field === 'exerciseId') {
+      return (
+        <Select
+          value={formData.exerciseId}
+          onValueChange={(value) => setFormData({ ...formData, exerciseId: value })}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Chọn bài tập" />
+          </SelectTrigger>
+          <SelectContent>
+            {exercisesLoading ? (
+              <SelectItem value="" disabled>Đang tải...</SelectItem>
+            ) : (
+              exercises?.map((exercise) => (
+                <SelectItem key={exercise.id} value={exercise.id.toString()}>
+                  {exercise.name} - {exercise.targetMuscle1}
+                </SelectItem>
+              ))
+            )}
+          </SelectContent>
+        </Select>
+      );
+    }
+
+    if (field === 'sessionId') {
+      return (
+        <Select
+          value={formData.sessionId}
+          onValueChange={(value) => setFormData({ ...formData, sessionId: value })}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Chọn phiên tập" />
+          </SelectTrigger>
+          <SelectContent>
+            {sessionsLoading ? (
+              <SelectItem value="" disabled>Đang tải...</SelectItem>
+            ) : (
+              sessions?.map((session) => (
+                <SelectItem key={session.id} value={session.id.toString()}>
+                  {session.name} - {new Date(session.date).toLocaleDateString('vi-VN')}
+                </SelectItem>
+              ))
+            )}
+          </SelectContent>
+        </Select>
+      );
+    }
+
+    return (
+      <Input
+        id={field}
+        type="number"
+        min="0"
+        value={formData[field]}
+        placeholder={fieldPlaceholders[field as keyof typeof fieldPlaceholders]}
+        onChange={(e) =>
+          setFormData({ ...formData, [field]: e.target.value })
+        }
+        className="w-full"
+      />
+    );
   };
 
   return (
@@ -78,25 +171,35 @@ function AddSetDialog({ onSuccess }: { onSuccess: () => void }) {
           Thêm set
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Thêm set tập</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          {['weight', 'reps', 'restTime', 'exerciseId', 'sessionId'].map((field) => (
-            <div key={field}>
-              <Label htmlFor={field}>{field}</Label>
-              <Input
-                id={field}
-                type="number"
-                value={formData[field as keyof typeof formData]}
-                onChange={(e) =>
-                  setFormData({ ...formData, [field]: e.target.value })
-                }
-              />
+          {(['weight', 'reps', 'restTime', 'exerciseId', 'sessionId'] as const).map((field) => (
+            <div key={field} className="space-y-2">
+              <Label htmlFor={field} className="text-sm font-medium">
+                {fieldLabels[field]}
+              </Label>
+              {renderField(field)}
             </div>
           ))}
-          <Button onClick={handleSubmit} className="w-full">Thêm</Button>
+          <div className="flex gap-2 pt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setOpen(false)}
+              className="flex-1"
+            >
+              Hủy
+            </Button>
+            <Button 
+              onClick={handleSubmit} 
+              className="flex-1"
+              disabled={createSetMutation.isPending}
+            >
+              {createSetMutation.isPending ? 'Đang thêm...' : 'Thêm'}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
@@ -122,6 +225,20 @@ function EditSetDialog({
   });
 
   const updateSetMutation = useUpdateSetMutation();
+  const { data: exercises, isLoading: exercisesLoading } = useExercisesQuery();
+
+  const fieldLabels = {
+    weight: 'Trọng lượng (kg)',
+    reps: 'Số lần lặp',
+    restTime: 'Thời gian nghỉ (giây)',
+    exerciseId: 'Bài tập',
+  };
+
+  const fieldPlaceholders = {
+    weight: 'Ví dụ: 0, 10, 20...',
+    reps: 'Ví dụ: 8, 10, 12...',
+    restTime: 'Ví dụ: 60, 90, 120...',
+  };
 
   useEffect(() => {
     if (editingSet) {
@@ -151,27 +268,77 @@ function EditSetDialog({
     }
   };
 
+  const renderField = (field: keyof typeof formData) => {
+    if (field === 'exerciseId') {
+      return (
+        <Select
+          value={formData.exerciseId}
+          onValueChange={(value) => setFormData({ ...formData, exerciseId: value })}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Chọn bài tập" />
+          </SelectTrigger>
+          <SelectContent>
+            {exercisesLoading ? (
+              <SelectItem value="" disabled>Đang tải...</SelectItem>
+            ) : (
+              exercises?.map((exercise) => (
+                <SelectItem key={exercise.id} value={exercise.id.toString()}>
+                  {exercise.name} - {exercise.targetMuscle1}
+                </SelectItem>
+              ))
+            )}
+          </SelectContent>
+        </Select>
+      );
+    }
+
+    return (
+      <Input
+        id={field}
+        type="number"
+        min="0"
+        value={formData[field]}
+        placeholder={fieldPlaceholders[field as keyof typeof fieldPlaceholders]}
+        onChange={(e) =>
+          setFormData({ ...formData, [field]: e.target.value })
+        }
+        className="w-full"
+      />
+    );
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Chỉnh sửa set tập</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          {['weight', 'reps', 'restTime', 'exerciseId'].map((field) => (
-            <div key={field}>
-              <Label htmlFor={field}>{field}</Label>
-              <Input
-                id={field}
-                type="number"
-                value={formData[field as keyof typeof formData]}
-                onChange={(e) =>
-                  setFormData({ ...formData, [field]: e.target.value })
-                }
-              />
+          {(['weight', 'reps', 'restTime', 'exerciseId'] as const).map((field) => (
+            <div key={field} className="space-y-2">
+              <Label htmlFor={field} className="text-sm font-medium">
+                {fieldLabels[field]}
+              </Label>
+              {renderField(field)}
             </div>
           ))}
-          <Button onClick={handleSubmit} className="w-full">Cập nhật</Button>
+          <div className="flex gap-2 pt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setOpen(false)}
+              className="flex-1"
+            >
+              Hủy
+            </Button>
+            <Button 
+              onClick={handleSubmit} 
+              className="flex-1"
+              disabled={updateSetMutation.isPending}
+            >
+              {updateSetMutation.isPending ? 'Đang cập nhật...' : 'Cập nhật'}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
@@ -256,7 +423,6 @@ export default function SessionListPage() {
         />
       </div>
 
-      {/* Hiển thị theo từng nhóm ngày */}
       <div className="space-y-8">
         {sortedDates.map((date) => (
           <div key={date} className="space-y-4">
@@ -284,8 +450,14 @@ export default function SessionListPage() {
                     <div className="flex justify-between"><span className="font-medium">Trọng lượng:</span><span>{set.weight} kg</span></div>
                     <div className="flex justify-between"><span className="font-medium">Số lần lặp:</span><span>{set.reps}</span></div>
                     <div className="flex justify-between"><span className="font-medium">Thời gian nghỉ:</span><span>{set.restTime} giây</span></div>
-                    <div className="flex justify-between"><span className="font-medium">Bài tập ID:</span><span>{set.exerciseId}</span></div>
-                    <div className="flex justify-between"><span className="font-medium">Phiên tập ID:</span><span>{set.sessionId}</span></div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Bài tập:</span>
+                      <span>{set.name || `ID: ${set.exerciseId}`}</span>
+                    </div>
+                    {/* <div className="flex justify-between">
+                      <span className="font-medium">Phiên tập:</span>
+                      <span>{set.sessionName || `ID: ${set.sessionId}`}</span>
+                    </div> */}
                     <div className="flex justify-end gap-2 mt-2">
                       <Button size="sm" variant="outline" onClick={() => handleEdit(set)}>
                         <Edit className="w-4 h-4" />
