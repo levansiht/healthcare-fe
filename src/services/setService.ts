@@ -13,6 +13,12 @@ export const setService = {
   async getSetById(id: number): Promise<Set> {
     return apiClient.get(`${API_ENDPOINTS.sets.list}/${id}`);
   },
+  // Get sets by user ID
+  async getSetByUserId(userId: number): Promise<Set[]> {
+    return apiClient.get(API_ENDPOINTS.sets.list, {
+      params: { userId },
+    });
+  },
 
   // Create set
   async createSet(data: CreateSetRequest): Promise<Set> {

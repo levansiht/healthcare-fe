@@ -38,6 +38,15 @@ export function useSetQuery(id: number) {
   });
 }
 
+export function useSetQueryByUserId(userId: number) {
+  return useQuery({
+    queryKey: setKeys.bySession(userId),
+    queryFn: () => setService.getSetByUserId(userId),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!userId,
+  });
+}
+
 export function useCreateSetMutation() {
   const queryClient = useQueryClient();
   const { success, error: showError } = useToast();

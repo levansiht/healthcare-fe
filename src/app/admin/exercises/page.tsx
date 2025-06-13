@@ -134,7 +134,7 @@ export default function ExercisesPage() {
 
     return filtered;
   }, [exercises, searchTerm, selectedMuscle]);
-
+  
   const handleCreateExercise = (data: CreateExerciseRequest) => {
     createExerciseMutation.mutate(data, {
       onSuccess: () => {
@@ -221,7 +221,7 @@ export default function ExercisesPage() {
                   <Label htmlFor="muscle">Nhóm cơ chính (tương thích cũ)</Label>
                   <Select
                     onValueChange={(value) =>
-                      createForm.setValue("muscle", value as MuscleGroup)
+                      createForm.setValue("targetMuscle1", value as string)
                     }
                   >
                     <SelectTrigger>
@@ -384,7 +384,7 @@ export default function ExercisesPage() {
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">
               {(() => {
-                const allMuscles = new Set<MuscleGroup>();
+                const allMuscles = new Set<string>();
                 exercises?.forEach((exercise) => {
                   allMuscles.add(exercise.targetMuscle1);
                   if (exercise.targetMuscle2)
@@ -447,7 +447,7 @@ export default function ExercisesPage() {
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
                         <Badge
-                          className={muscleGroupColors[exercise.targetMuscle1]}
+                          className={muscleGroupColors[exercise.targetMuscle1 as MuscleEnum]}
                           variant="secondary"
                         >
                           {exercise.targetMuscle1}
@@ -455,7 +455,7 @@ export default function ExercisesPage() {
                         {exercise.targetMuscle2 && (
                           <Badge
                             className={
-                              muscleGroupColors[exercise.targetMuscle2]
+                              muscleGroupColors[exercise.targetMuscle2 as MuscleEnum]
                             }
                             variant="secondary"
                           >
@@ -465,7 +465,7 @@ export default function ExercisesPage() {
                         {exercise.targetMuscle3 && (
                           <Badge
                             className={
-                              muscleGroupColors[exercise.targetMuscle3]
+                              muscleGroupColors[exercise.targetMuscle3 as MuscleEnum]
                             }
                             variant="secondary"
                           >
@@ -578,9 +578,9 @@ export default function ExercisesPage() {
                   Nhóm cơ mục tiêu 1 <span className="text-red-500">*</span>
                 </Label>
                 <Select
-                  value={editForm.watch("targetMuscle1")}
+                  value={editForm.watch("targetMuscle1") ?? undefined}
                   onValueChange={(value) =>
-                    editForm.setValue("targetMuscle1", value as MuscleGroup)
+                    editForm.setValue("targetMuscle1", value)
                   }
                 >
                   <SelectTrigger>
@@ -630,7 +630,7 @@ export default function ExercisesPage() {
                   onValueChange={(value) =>
                     editForm.setValue(
                       "targetMuscle3",
-                      value === "none" ? undefined : (value as MuscleGroup)
+                      value === "none" ? undefined : (value as string)
                     )
                   }
                 >

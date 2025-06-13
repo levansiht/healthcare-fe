@@ -25,7 +25,7 @@ export default function Dashboard() {
             ],
         },
         {
-            href: "/dashboard/set",
+            href: "/dashboard/session",
             title: "Các bài tập",
             description: "Khám phá và lựa chọn các bài tập, kế hoạch tập luyện phù hợp với mục tiêu của bạn.",
             icon: ListChecks,

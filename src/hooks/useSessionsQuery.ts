@@ -39,6 +39,22 @@ export function useSessionsByUserQuery(userId: number) {
   });
 }
 
+export function useTrainingVolumeByUserQuery(userId: number) {
+  return useQuery({
+    queryKey: [...sessionKeys.all, "volume", userId],
+    queryFn: () => sessionService.getTrainingVolumeByUser(userId),
+    enabled: !!userId,
+  });
+}
+
+export function useSessionsByDateAndUserQuery(userId: number, date: string) {
+  return useQuery({
+    queryKey: sessionKeys.list({ userId, date }),
+    queryFn: () => sessionService.getSessionsByDateAndUser(userId, date),
+    enabled: !!userId && !!date,
+  });
+}
+
 export function useCreateSessionMutation() {
   const queryClient = useQueryClient();
   const { success, error: showError } = useToast();
@@ -96,3 +112,4 @@ export function useDeleteSessionMutation() {
     },
   });
 }
+

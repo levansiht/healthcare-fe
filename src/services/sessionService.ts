@@ -24,6 +24,7 @@ export const sessionService = {
       params: { userId },
     });
   },
+
   // Create session
   async createSession(data: CreateSessionRequest): Promise<Session> {
     return apiClient.post(API_ENDPOINTS.sessions.create, data);
@@ -43,6 +44,20 @@ export const sessionService = {
   async getSessionsByPlan(planId: number): Promise<Session[]> {
     return apiClient.get(API_ENDPOINTS.sessions.list, {
       params: { planId },
+    });
+  },
+
+  // Get training volume by user ID
+  async getTrainingVolumeByUser(userId: number): Promise<{ date: string; volume: number }[]> {
+    return apiClient.get(API_ENDPOINTS.sessions.list, {
+      params: { userId },
+    });
+  },
+
+  // Get sessions by user and date
+  async getSessionsByDateAndUser(userId: number, date: string): Promise<Session[]> {
+    return apiClient.get(API_ENDPOINTS.sessions.list, {
+      params: { date, userId },
     });
   },
 };
