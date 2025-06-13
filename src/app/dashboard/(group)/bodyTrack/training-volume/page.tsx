@@ -30,7 +30,7 @@ export default function PageTrainingVolume() {
     }
   }, []);
   
-  const { data: rawVolumeData, isLoading, isError } = useTrainingVolumeByUserQuery(user.id);
+  const { data: rawVolumeData, isLoading, isError } = useTrainingVolumeByUserQuery(user.id, 1);
 
   // Chuyển đổi dữ liệu từ API thành format phù hợp cho chart
   const trainingVolumeData = useMemo(() => {

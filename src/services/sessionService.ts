@@ -48,9 +48,9 @@ export const sessionService = {
   },
 
   // Get training volume by user ID
-  async getTrainingVolumeByUser(userId: number): Promise<{ date: string; volume: number }[]> {
+  async getTrainingVolumeByUser(userId: number, volume: number): Promise<{ date: string; volume: number }[]> {
     return apiClient.get(API_ENDPOINTS.sessions.list, {
-      params: { userId },
+      params: { userId, volume },
     });
   },
 

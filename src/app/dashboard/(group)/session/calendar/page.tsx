@@ -186,13 +186,11 @@ function AddSetDialog({ onSuccess }: { onSuccess: () => void }) {
   });
 
   const createSetMutation = useCreateSetMutation();
-  const { data: exercises, isLoading: exercisesLoading } = useExercisesQuery();
-  console.log("check: ", exercises);
-  
+  const { data: exercises, isLoading: exercisesLoading } = useExercisesQuery();  
   const userId = GetUserId();
-  console.log("userId: ", userId);
-  
   const { data: sessions, isLoading: sessionsLoading } = useSessionsByUserQuery(userId || 0);
+  console.log("sessions", sessions);
+  
 
   const fieldLabels = {
     weight: "Trọng lượng (kg)",

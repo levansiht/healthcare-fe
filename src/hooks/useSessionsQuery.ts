@@ -39,10 +39,10 @@ export function useSessionsByUserQuery(userId: number) {
   });
 }
 
-export function useTrainingVolumeByUserQuery(userId: number) {
+export function useTrainingVolumeByUserQuery(userId: number, volume: number) {
   return useQuery({
     queryKey: [...sessionKeys.all, "volume", userId],
-    queryFn: () => sessionService.getTrainingVolumeByUser(userId),
+    queryFn: () => sessionService.getTrainingVolumeByUser(userId, volume || 1),
     enabled: !!userId,
   });
 }
