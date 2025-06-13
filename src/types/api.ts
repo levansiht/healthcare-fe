@@ -156,7 +156,7 @@ export interface Session {
 }
 
 export interface CreateSessionRequest {
-    name: string;
+    name?: string;
     date: string;
     planId: number;
 }
