@@ -117,8 +117,12 @@ export default function ExercisesPage() {
     if (searchTerm) {
       filtered = filtered.filter(
         (exercise) =>
-          exercise.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          exercise.description.toLowerCase().includes(searchTerm.toLowerCase())
+          (exercise.name?.toLowerCase() || "").includes(
+            searchTerm.toLowerCase()
+          ) ||
+          (exercise.description?.toLowerCase() || "").includes(
+            searchTerm.toLowerCase()
+          )
       );
     }
 
