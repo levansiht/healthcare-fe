@@ -85,8 +85,10 @@ export default function PlansPage() {
     if (searchTerm) {
       filtered = filtered.filter(
         (plan) =>
-          plan.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          plan.description.toLowerCase().includes(searchTerm.toLowerCase())
+          (plan.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+          (plan.description?.toLowerCase() || "").includes(
+            searchTerm.toLowerCase()
+          )
       );
     }
 
