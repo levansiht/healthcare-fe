@@ -26,15 +26,20 @@ export interface PaginatedResponse<T> {
 // Healthcare API Types
 export type MembershipTier = "Basic" | "Premium" | "Pro";
 export type RoleEnum = "User" | "Admin";
-export type MuscleGroup =
-  | "Chest"
-  | "Back"
-  | "Shoulders"
-  | "Arms"
-  | "Abs"
-  | "Legs"
-  | "Glutes"
-  | "Other";
+export enum MuscleEnum {
+  QUADS = "Quads",
+  HAMSTRING = "Hamstring",
+  CALVES = "Calves",
+  GLUTES = "Glutes",
+  BACK = "Back",
+  CHEST = "Chest",
+  SHOULDERS = "Shoulders",
+  TRICEPS = "Triceps",
+  BICEPS = "Biceps",
+  TRAPS = "Traps",
+}
+
+export type MuscleGroup = MuscleEnum;
 
 // User Types (Healthcare API)
 export interface User {

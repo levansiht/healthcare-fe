@@ -59,6 +59,7 @@ import {
   CreateExerciseRequest,
   UpdateExerciseRequest,
   MuscleGroup,
+  MuscleEnum,
 } from "@/types/api";
 import { useForm } from "react-hook-form";
 import {
@@ -69,25 +70,29 @@ import {
 } from "@/hooks/useExercisesQuery";
 
 const muscleGroups: MuscleGroup[] = [
-  "Chest",
-  "Back",
-  "Shoulders",
-  "Arms",
-  "Abs",
-  "Legs",
-  "Glutes",
-  "Other",
+  MuscleEnum.QUADS,
+  MuscleEnum.HAMSTRING,
+  MuscleEnum.CALVES,
+  MuscleEnum.GLUTES,
+  MuscleEnum.BACK,
+  MuscleEnum.CHEST,
+  MuscleEnum.SHOULDERS,
+  MuscleEnum.TRICEPS,
+  MuscleEnum.BICEPS,
+  MuscleEnum.TRAPS,
 ];
 
 const muscleGroupColors: Record<MuscleGroup, string> = {
-  Chest: "bg-red-100 text-red-800",
-  Back: "bg-blue-100 text-blue-800",
-  Shoulders: "bg-yellow-100 text-yellow-800",
-  Arms: "bg-purple-100 text-purple-800",
-  Abs: "bg-green-100 text-green-800",
-  Legs: "bg-orange-100 text-orange-800",
-  Glutes: "bg-pink-100 text-pink-800",
-  Other: "bg-gray-100 text-gray-800",
+  [MuscleEnum.QUADS]: "bg-blue-100 text-blue-800",
+  [MuscleEnum.HAMSTRING]: "bg-purple-100 text-purple-800",
+  [MuscleEnum.CALVES]: "bg-orange-100 text-orange-800",
+  [MuscleEnum.GLUTES]: "bg-pink-100 text-pink-800",
+  [MuscleEnum.BACK]: "bg-green-100 text-green-800",
+  [MuscleEnum.CHEST]: "bg-red-100 text-red-800",
+  [MuscleEnum.SHOULDERS]: "bg-yellow-100 text-yellow-800",
+  [MuscleEnum.TRICEPS]: "bg-indigo-100 text-indigo-800",
+  [MuscleEnum.BICEPS]: "bg-cyan-100 text-cyan-800",
+  [MuscleEnum.TRAPS]: "bg-gray-100 text-gray-800",
 };
 
 export default function ExercisesPage() {
@@ -427,7 +432,6 @@ export default function ExercisesPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Tên bài tập</TableHead>
-                  <TableHead>Nhóm cơ chính</TableHead>
                   <TableHead>Nhóm cơ mục tiêu</TableHead>
                   <TableHead>Mô tả</TableHead>
                   <TableHead>URL hình ảnh</TableHead>
@@ -439,11 +443,6 @@ export default function ExercisesPage() {
                   <TableRow key={exercise.id}>
                     <TableCell className="font-medium">
                       {exercise.name}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={muscleGroupColors[exercise.muscle]}>
-                        {exercise.muscle}
-                      </Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">

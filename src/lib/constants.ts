@@ -93,14 +93,16 @@ export const MEMBERSHIP_TIERS = {
 } as const;
 
 export const MUSCLE_GROUPS = {
-  CHEST: "Chest",
-  BACK: "Back",
-  SHOULDERS: "Shoulders",
-  ARMS: "Arms",
-  ABS: "Abs",
-  LEGS: "Legs",
+  QUADS: "Quads",
+  HAMSTRING: "Hamstring",
+  CALVES: "Calves",
   GLUTES: "Glutes",
-  OTHER: "Other",
+  BACK: "Back",
+  CHEST: "Chest",
+  SHOULDERS: "Shoulders",
+  TRICEPS: "Triceps",
+  BICEPS: "Biceps",
+  TRAPS: "Traps",
 } as const;
 
 export type MembershipTier =

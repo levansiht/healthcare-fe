@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   Users,
@@ -12,8 +12,11 @@ import {
   BarChart3,
   Settings,
   Home,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { authService } from "@/services/authService";
+import { clearAuthCookieAction } from "@/actions/authActions";
 
 const menuItems = [
   {
@@ -55,6 +58,17 @@ const menuItems = [
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      await clearAuthCookieAction();
+      router.push("/auth/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -97,10 +111,18 @@ export function AdminSidebar() {
       </div>
 
       {/* Footer */}
-      <div className="border-t p-4">
+      <div className="border-t p-4 space-y-2">
         <Button variant="ghost" className="w-full justify-start gap-3">
           <Settings className="w-4 h-4" />
           Cài đặt
+        </Button>
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50"
+          onClick={handleLogout}
+        >
+          <LogOut className="w-4 h-4" />
+          Đăng xuất
         </Button>
       </div>
     </div>

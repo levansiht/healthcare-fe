@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Menu, Bell } from "lucide-react";
+import { Menu, Bell, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { AdminSidebar } from "@/components/admin-sidebar";
+import { useRouter } from "next/navigation";
+import { authService } from "@/services/authService";
+import { clearAuthCookieAction } from "@/actions/authActions";
 
 export default function AdminLayout({
   children,
@@ -12,6 +15,17 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      await clearAuthCookieAction();
+      router.push("/auth/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <div className="flex h-screen bg-background">
@@ -49,6 +63,14 @@ export default function AdminLayout({
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="icon">
                 <Bell className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleLogout}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <LogOut className="h-5 w-5" />
               </Button>
             </div>
           </div>
