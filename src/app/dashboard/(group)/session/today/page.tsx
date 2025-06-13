@@ -27,7 +27,7 @@ export default function TodaySessionPage() {
         }
     }, []);
     // const [date, setDate] = useState<string>("2025-01-01");
-    const date = "2025-01-01";
+    const date = new Date().toISOString().split('T')[0];
     const { data: sessions = [], isLoading: loading } = useSessionsByDateAndUserQuery(user.id, date);
 
     // Cast to correct response type and map to UI model
