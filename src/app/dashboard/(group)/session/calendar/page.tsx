@@ -37,6 +37,7 @@ interface SetType {
   restTime: number;
   exerciseId: number;
   sessionId: number;
+  date: string; 
 }
 
 // ==================== Add Set Dialog Component ====================
@@ -102,7 +103,6 @@ function AddSetDialog({ onSuccess }: { onSuccess: () => void }) {
   );
 }
 
-// ==================== Edit Set Dialog Component ====================
 function EditSetDialog({
   open,
   setOpen,
@@ -198,7 +198,26 @@ export default function SessionListPage() {
   }, []);
 
   const { data: setData, isLoading, isError, refetch } = useSetQueryByUserId(user.id);
+  console.log('setData:', setData);
+  
   const deleteSetMutation = useDeleteSetMutation();
+
+  const groupedSets = React.useMemo(() => {
+    if (!setData) return {};
+    
+    return (setData as SetType[]).reduce((groups, set) => {
+      const date = set.date;
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(set);
+      return groups;
+    }, {} as Record<string, SetType[]>);
+  }, [setData]);
+
+  const sortedDates = Object.keys(groupedSets).sort((a, b) => 
+    new Date(b).getTime() - new Date(a).getTime()
+  );
 
   const handleEdit = (set: UpdateSetRequest) => {
     setEditingSet(set);
@@ -237,30 +256,57 @@ export default function SessionListPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
-        {(setData as SetType[]).map((set) => (
-          <Card key={set.id}>
-            <CardHeader>
-              <CardTitle>Set ID: {set.id}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm text-gray-600">
-              <div className="flex justify-between"><span className="font-medium">Trọng lượng:</span><span>{set.weight} kg</span></div>
-              <div className="flex justify-between"><span className="font-medium">Số lần lặp:</span><span>{set.reps}</span></div>
-              <div className="flex justify-between"><span className="font-medium">Thời gian nghỉ:</span><span>{set.restTime} giây</span></div>
-              <div className="flex justify-between"><span className="font-medium">Bài tập ID:</span><span>{set.exerciseId}</span></div>
-              <div className="flex justify-between"><span className="font-medium">Phiên tập ID:</span><span>{set.sessionId}</span></div>
-              <div className="flex justify-end gap-2 mt-2">
-                <Button size="sm" variant="outline" onClick={() => handleEdit(set)}>
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => handleDelete(set.id)}>
-                  <Trash className="w-4 h-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+      {/* Hiển thị theo từng nhóm ngày */}
+      <div className="space-y-8">
+        {sortedDates.map((date) => (
+          <div key={date} className="space-y-4">
+            <div className="border-b pb-2">
+              <h2 className="text-xl font-semibold text-gray-800">
+                {new Date(date).toLocaleDateString('vi-VN', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </h2>
+              <p className="text-sm text-gray-500">
+                {groupedSets[date].length} set tập
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-4">
+              {groupedSets[date].map((set) => (
+                <Card key={set.id}>
+                  <CardHeader>
+                    <CardTitle>Set ID: {set.id}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2 text-sm text-gray-600">
+                    <div className="flex justify-between"><span className="font-medium">Trọng lượng:</span><span>{set.weight} kg</span></div>
+                    <div className="flex justify-between"><span className="font-medium">Số lần lặp:</span><span>{set.reps}</span></div>
+                    <div className="flex justify-between"><span className="font-medium">Thời gian nghỉ:</span><span>{set.restTime} giây</span></div>
+                    <div className="flex justify-between"><span className="font-medium">Bài tập ID:</span><span>{set.exerciseId}</span></div>
+                    <div className="flex justify-between"><span className="font-medium">Phiên tập ID:</span><span>{set.sessionId}</span></div>
+                    <div className="flex justify-end gap-2 mt-2">
+                      <Button size="sm" variant="outline" onClick={() => handleEdit(set)}>
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => handleDelete(set.id)}>
+                        <Trash className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
+
+      {sortedDates.length === 0 && (
+        <div className="text-center text-gray-500 py-8">
+          Chưa có set tập nào được ghi nhận.
+        </div>
+      )}
     </div>
   );
 }

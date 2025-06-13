@@ -26,7 +26,8 @@ export default function TodaySessionPage() {
             setUser({ id: 1 });
         }
     }, []);
-    const [date, setDate] = useState<string>("2025-01-01");
+    // const [date, setDate] = useState<string>("2025-01-01");
+    const date = "2025-01-01";
     const { data: sessions = [], isLoading: loading } = useSessionsByDateAndUserQuery(user.id, date);
 
     // Cast to correct response type and map to UI model
@@ -47,12 +48,12 @@ export default function TodaySessionPage() {
         {/* date selector */}
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Bài tập ngày {date}</h1>
-          <input
+          {/* <input
             type="date"
             value={date}
             onChange={e => setDate(e.target.value)}
             className="border rounded px-2 py-1"
-          />
+          /> */}
         </div>
         {/* exercise list */}
         <div className="space-y-4">
